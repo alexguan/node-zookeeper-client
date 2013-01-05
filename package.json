@@ -1,0 +1,21 @@
+{
+  "name": "node-zookeeper-client",
+  "version": "0.0.1",
+  "description": "A pure Javascript zookeeper client for Node.js.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "",
+  "keywords": [
+    "zookeeper",
+    "client",
+    "pure",
+    "javascript"
+  ],
+  "author": "Alex Guan",
+  "license": "BSD",
+  "dependencies": {
+    "underscore": "~1.4.3"
+  }
+}
