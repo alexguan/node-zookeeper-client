@@ -47,7 +47,8 @@ socket.on('connect', function () {
     offset += 16;
 
     buf.writeInt32BE(offset - 4, 0); // put the right length.
-
+    console.log('connect size: ' + offset);
+    console.log(buf.slice(0, offset).toString('hex'));
     socket.write(buf.slice(0, offset), function () {
         console.log('finished writing');
     });

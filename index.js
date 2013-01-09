@@ -11,13 +11,11 @@
  */
 
 var events = require('events');
-var utils = require('utils');
+var util = require('util');
 var net = require('net');
 
 var u = require('underscore');
 
-var ServerList = require('./lib/ServerList.js');
-var State = require('./lib/State.js');
 var ConnectionManager = require('./lib/ConnectionManager.js');
 
 // Constants.
@@ -25,8 +23,16 @@ var CLIENT_DEFAULT_OPTIONS = {
     timeout : 30000 // Default to 30 seconds.
 };
 
+var STATES = {
+    DISCONNECTED : 0,
+    SYNC_CONNECTED : 3,
+    AUTH_FAILED : 4,
+    CONNECTED_READ_ONLY : 5,
+    EXPIRED : -122
+};
 
 function defaultStateListener(state) {
+    console.log('Current client state is: %s', state);
 }
 
 /**
@@ -53,23 +59,18 @@ function Client(connectionString, options, stateListener) {
         throw new Error('stateListener must be a valid function.');
     }
 
-    this.serverList = new ServerList(connectionString);
+    this.connectionManager = new ConnectionManager(connectionString, options, defaultStateListener);
     this.options = options;
-    this.state = State.DISCONNECTED;
+    this.state = STATES.DISCONNECTED;
 
     // TODO: Need to make sure we only have one listener for state.
     this.on('state', stateListener);
 }
 
-utils.inherits(Client, events.EventEmitter);
-
+util.inherits(Client, events.EventEmitter);
 
 Client.prototype.connect = function () {
-    // Do nothing when we already connected to the server.
-    if (this.state === State.CONNECTED) {
-        return;
-    }
-
+    this.connectionManager.start();
 };
 
 /**
@@ -97,4 +98,4 @@ function createClient(connectionString, options, stateListener) {
 }
 
 exports.createClient = createClient;
-exports.State = State;
+exports.STATES = STATES;

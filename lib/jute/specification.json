@@ -1,0 +1,17 @@
+{
+    "protocol" : {
+        "ConnectRequest" : [
+            { "name" : "protocolVersion", "type" : "int"},
+            { "name" : "lastZxidSeen", "type" : "long"},
+            { "name" : "timeOut", "type" : "int"},
+            { "name" : "sessionId", "type" : "long"},
+            { "name" : "passwd", "type" : "buffer"}
+        ],
+        "ConnectResponse" : [
+            { "name" : "protocolVersion", "type" : "int" },
+            { "name" : "timeOut", "type" : "int" },
+            { "name" : "sessionId", "type" : "long" },
+            { "name" : "passwd", "type" : "buffer" }
+        ]
+    }
+}
