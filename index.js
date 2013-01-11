@@ -127,7 +127,6 @@ Client.prototype.create = function (path, acls, flags, data, callback) {
     requestPayload.acl = acls;
     requestPayload.flags = flags;
     requestPayload.data = data;
-    requestPayload.watch = false;
 
     this.connectionManager.queuePacket({
         request : new jute.Request(requestHeader, requestPayload),
@@ -135,6 +134,49 @@ Client.prototype.create = function (path, acls, flags, data, callback) {
         callback : callback
     });
 };
+
+
+/**
+ * Delete a znode with the given path. If version is not -1, the request will
+ * fail when the provided version does not match the server version.
+ *
+ * callback prototype:
+ * callback(error)
+ *
+ * @method delete
+ * @param path {String} The znode path.
+ * @param flags {Number} The version of the znode, optional, defaults to -1.
+ * @param callback {Function} The callback function.
+ */
+Client.prototype.remove = function (path, version, callback) {
+    if (!callback) {
+        callback = version;
+        version = -1;
+    }
+
+    if (!path || typeof path !== 'string') {
+        throw new Error('path must be a non-empty string.');
+    }
+
+    if (typeof version !== 'number') {
+        throw new Error('version must be a number.');
+    }
+
+    var requestHeader = new jute.protocol.RequestHeader(),
+        requestPayload = new jute.protocol.DeleteRequest(),
+        responseHeader = new jute.protocol.ReplyHeader();
+
+    requestHeader.type = jute.OPERATION_CODES.DELETE;
+    requestPayload.path = path;
+    requestPayload.version = version;
+
+    this.connectionManager.queuePacket({
+        request : new jute.Request(requestHeader, requestPayload),
+        response : new jute.Response(responseHeader, null),
+        callback : callback
+    });
+};
+
 /**
  * For the given znode path, return the children list and the stat.
  *
@@ -208,6 +250,8 @@ function createClient(connectionString, options, stateListener) {
 
     return new Client(connectionString, options, stateListener);
 }
+
+
 
 exports.createClient = createClient;
 exports.jute = jute;

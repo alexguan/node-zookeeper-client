@@ -54,6 +54,10 @@
         "CreateResponse" : [
             { "name" : "path", "type" : "ustring" }
         ],
+        "DeleteRequest" : [
+            { "name" : "path", "type" : "ustring" },
+            { "name" : "version", "type" : "int" }
+        ],
         "GetChildren2Request" : [
             { "name" : "path", "type" : "ustring" },
             { "name" : "watch", "type" : "boolean" }
