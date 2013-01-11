@@ -11,6 +11,14 @@ var client = zookeeper.createClient(
 
 client.on('state', function (state) {
     console.log('New state: ' + state);
+
+    if (state === 2) {
+        /*
+        client.getChildren('/', function (result) {
+            console.dir(result);
+        });
+        */
+    }
 });
 
 client.on('error', function (error) {

@@ -34,7 +34,7 @@ var STATES = {
 };
 
 function defaultStateListener(state) {
-    console.log('Current client state is: %s', state);
+    console.log('Current connection manager state is: %s', state);
 }
 
 /**
@@ -61,10 +61,15 @@ function Client(connectionString, options, stateListener) {
         throw new Error('stateListener must be a valid function.');
     }
 
+    var self = this;
+
     this.connectionManager = new ConnectionManager(
         connectionString,
         options,
-        defaultStateListener
+        function (state) {
+            console.log('Current connection manager state is: %s', state);
+            self.emit('state', state);
+        }
     );
 
     this.options = options;
@@ -113,12 +118,19 @@ Client.prototype.getChildren = function (path, watcher, callback) {
     }
 
     var requestHeader = new jute.protocol.RequestHeader(),
-        requestPayload = new jute.protocol.GetChildrenRequest(),
+        requestPayload = new jute.protocol.GetChildren2Request(),
         responseHeader = new jute.protocol.ReplyHeader(),
-        responsePayload = new jute.protocol.GetChildrenResponse();
+        responsePayload = new jute.protocol.GetChildren2Response();
 
     requestHeader.type = jute.OPERATION_CODES.GET_CHILDREN2;
     requestPayload.path = path;
+    requestPayload.watch = false;
+    requestPayload.callback = callback;
+
+    this.connectionManager.queuePacket({
+        request : new jute.Request(requestHeader, requestPayload),
+        response : new jute.Response(responseHeader, responsePayload)
+    });
 };
 
 /**
