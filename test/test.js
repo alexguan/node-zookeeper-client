@@ -1,10 +1,10 @@
 var zookeeper = require('../index.js');
 
 var client = zookeeper.createClient(
-    'breadsmall.corp.yahoo.com:2181',
+    process.argv[2] || 'localhost:2181',
     {
         timeout : 30000,
-        spinDeplay : 1000
+        spinDelay : 1000
     }
 );
 

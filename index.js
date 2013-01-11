@@ -16,11 +16,13 @@ var net = require('net');
 
 var u = require('underscore');
 
+var jute = require('./lib/jute');
 var ConnectionManager = require('./lib/ConnectionManager.js');
 
 // Constants.
 var CLIENT_DEFAULT_OPTIONS = {
-    timeout : 30000 // Default to 30 seconds.
+    sessionTimeout : 30000, // Default to 30 seconds.
+    spinDelay : 1000 // 1 second
 };
 
 var STATES = {
@@ -59,7 +61,12 @@ function Client(connectionString, options, stateListener) {
         throw new Error('stateListener must be a valid function.');
     }
 
-    this.connectionManager = new ConnectionManager(connectionString, options, defaultStateListener);
+    this.connectionManager = new ConnectionManager(
+        connectionString,
+        options,
+        defaultStateListener
+    );
+
     this.options = options;
     this.state = STATES.DISCONNECTED;
 
@@ -71,6 +78,47 @@ util.inherits(Client, events.EventEmitter);
 
 Client.prototype.connect = function () {
     this.connectionManager.start();
+};
+
+/**
+ * For the given znode path, return the children list and the stat.
+ *
+ * If the watcher callback is provided and the method completes succesfully,
+ * a watcher will be placed the given znode. The watcher will be triggered
+ * when a operation successfully deletes the given znode or create/delete
+ * the child under it.
+ *
+ * callback prototype:
+ * callback(children, stat);
+ *
+ * watcher prototype:
+ *
+ * @method getChildren
+ * @param path {String} The znode path.
+ * @param watcher {Function} The watcher function, optional.
+ * @param callback {Function} The callback function.
+ */
+Client.prototype.getChildren = function (path, watcher, callback) {
+    if (!callback) {
+        callback = watcher;
+        watcher = null;
+    }
+
+    if (!path || typeof path !== 'string') {
+        throw new Error('path must be a non-empty string.');
+    }
+
+    if (typeof callback !== 'function') {
+        throw new Error('callback must be function.');
+    }
+
+    var requestHeader = new jute.protocol.RequestHeader(),
+        requestPayload = new jute.protocol.GetChildrenRequest(),
+        responseHeader = new jute.protocol.ReplyHeader(),
+        responsePayload = new jute.protocol.GetChildrenResponse();
+
+    requestHeader.type = jute.OPERATION_CODES.GET_CHILDREN2;
+    requestPayload.path = path;
 };
 
 /**

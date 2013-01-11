@@ -3,7 +3,7 @@ var net = require('net');
 
 
 var socket = net.connect({
-    host : 'breadsmall.corp.yahoo.com',
+    host : process.argv[2] || 'localhost',
     port : 2181
 });
 

@@ -1,4 +1,19 @@
 {
+    "data" : {
+        "Stat" : [
+            { "name" : "czxid", "type" : "long" },
+            { "name" : "mzxid", "type" : "long" },
+            { "name" : "ctime", "type" : "long" },
+            { "name" : "mtime", "type" : "long" },
+            { "name" : "version", "type" : "int" },
+            { "name" : "cversion", "type" : "int" },
+            { "name" : "aversion", "type" : "int" },
+            { "name" : "ephemeralOwner", "type" : "long" },
+            { "name" : "dataLength", "type" : "int" },
+            { "name" : "numChildren", "type" : "int" },
+            { "name" : "pzxid", "type" : "long" }
+        ]
+    },
     "protocol" : {
         "ConnectRequest" : [
             { "name" : "protocolVersion", "type" : "int"},
@@ -12,6 +27,22 @@
             { "name" : "timeOut", "type" : "int" },
             { "name" : "sessionId", "type" : "long" },
             { "name" : "passwd", "type" : "buffer" }
+        ],
+        "RequestHeader" : [
+            { "name" : "xid", "type" : "int" },
+            { "name" : "type", "type" : "int"}
+        ],
+        "ReplyHeader" : [
+            { "name" : "xid", "type" : "int" },
+            { "name" : "type", "type" : "int"}
+        ],
+        "GetChildren2Request" : [
+            { "name" : "path", "type" : "ustring" },
+            { "name" : "watch", "type" : "boolean" }
+        ],
+        "GetChildren2Response" : [
+            { "name" : "children", "type" : "vector<ustring>" },
+            { "name" : "stat", "type" : "data.Stat" }
         ]
     }
 }
