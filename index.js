@@ -85,6 +85,57 @@ Client.prototype.connect = function () {
 };
 
 /**
+ * Create a znode with the given path, data and ACL.
+ *
+ * callback prototype:
+ * callback(error)
+ *
+ * watcher prototype:
+ *
+ * @method create
+ * @param path {String} The znode path.
+ * @param acls {Array} The list of ACLs.
+ * @param flags {Number} The creation flags.
+ * @param data {Buffer} The data buffer, optional
+ * @param callback {Function} The callback function.
+ */
+Client.prototype.create = function (path, acls, flags, data, callback) {
+    if (!callback) {
+        callback = data;
+        data = undefined;
+    }
+
+    if (!path || typeof path !== 'string') {
+        throw new Error('path must be a non-empty string.');
+    }
+
+    if (!Array.isArray(acls) || acls.length < 1) {
+        throw new Error('acls must be a non-empty array.');
+    }
+
+    if (typeof flags !== 'number') {
+        throw new Error('flags must be a number.');
+    }
+
+    var requestHeader = new jute.protocol.RequestHeader(),
+        requestPayload = new jute.protocol.CreateRequest(),
+        responseHeader = new jute.protocol.ReplyHeader(),
+        responsePayload = new jute.protocol.CreateResponse();
+
+    requestHeader.type = jute.OPERATION_CODES.CREATE;
+    requestPayload.path = path;
+    requestPayload.acl = acls;
+    requestPayload.flags = flags;
+    requestPayload.data = data;
+    requestPayload.watch = false;
+
+    this.connectionManager.queuePacket({
+        request : new jute.Request(requestHeader, requestPayload),
+        response : new jute.Response(responseHeader, responsePayload),
+        callback : callback
+    });
+};
+/**
  * For the given znode path, return the children list and the stat.
  *
  * If the watcher callback is provided and the method completes succesfully,
@@ -93,7 +144,7 @@ Client.prototype.connect = function () {
  * the child under it.
  *
  * callback prototype:
- * callback(children, stat);
+ * callback(error, children, stat);
  *
  * watcher prototype:
  *
@@ -105,7 +156,7 @@ Client.prototype.connect = function () {
 Client.prototype.getChildren = function (path, watcher, callback) {
     if (!callback) {
         callback = watcher;
-        watcher = null;
+        watcher = undefined;
     }
 
     if (!path || typeof path !== 'string') {
@@ -125,6 +176,8 @@ Client.prototype.getChildren = function (path, watcher, callback) {
     requestPayload.path = path;
     requestPayload.watch = false;
 
+    // TODO: CHANGE THIS TO request(request object) and connection manager
+    // should create the response object.
     this.connectionManager.queuePacket({
         request : new jute.Request(requestHeader, requestPayload),
         response : new jute.Response(responseHeader, responsePayload),
@@ -157,4 +210,5 @@ function createClient(connectionString, options, stateListener) {
 }
 
 exports.createClient = createClient;
+exports.jute = jute;
 exports.STATES = STATES;

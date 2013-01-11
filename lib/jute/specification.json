@@ -1,5 +1,13 @@
 {
     "data" : {
+        "Id" : [
+            { "name" : "scheme", "type" : "ustring" },
+            { "name" : "id", "type" : "ustring" }
+        ],
+        "ACL" : [
+            { "name" : "perms", "type" : "int" },
+            { "name" : "id", "type" : "data.Id" }
+        ],
         "Stat" : [
             { "name" : "czxid", "type" : "long" },
             { "name" : "mzxid", "type" : "long" },
@@ -37,16 +45,18 @@
             { "name" : "zxid", "type" : "long"},
             { "name" : "err", "type" : "int"}
         ],
+        "CreateRequest" : [
+            { "name" : "path", "type" : "ustring" },
+            { "name" : "data", "type" : "buffer" },
+            { "name" : "acl", "type" : "vector<data.ACL>" },
+            { "name" : "flags", "type" : "int" }
+        ],
+        "CreateResponse" : [
+            { "name" : "path", "type" : "ustring" }
+        ],
         "GetChildren2Request" : [
             { "name" : "path", "type" : "ustring" },
             { "name" : "watch", "type" : "boolean" }
-        ],
-        "GetChildrenRequest" : [
-            { "name" : "path", "type" : "ustring" },
-            { "name" : "watch", "type" : "boolean" }
-        ],
-        "GetChildrenResponse" : [
-            { "name" : "children", "type" : "vector<ustring>" }
         ],
         "GetChildren2Response" : [
             { "name" : "children", "type" : "vector<ustring>" },
