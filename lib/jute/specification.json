@@ -34,11 +34,19 @@
         ],
         "ReplyHeader" : [
             { "name" : "xid", "type" : "int" },
-            { "name" : "type", "type" : "int"}
+            { "name" : "zxid", "type" : "long"},
+            { "name" : "err", "type" : "int"}
         ],
         "GetChildren2Request" : [
             { "name" : "path", "type" : "ustring" },
             { "name" : "watch", "type" : "boolean" }
+        ],
+        "GetChildrenRequest" : [
+            { "name" : "path", "type" : "ustring" },
+            { "name" : "watch", "type" : "boolean" }
+        ],
+        "GetChildrenResponse" : [
+            { "name" : "children", "type" : "vector<ustring>" }
         ],
         "GetChildren2Response" : [
             { "name" : "children", "type" : "vector<ustring>" },

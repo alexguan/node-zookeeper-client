@@ -13,11 +13,14 @@ client.on('state', function (state) {
     console.log('New state: ' + state);
 
     if (state === 2) {
-        /*
-        client.getChildren('/', function (result) {
-            console.dir(result);
+        client.getChildren('/', function (error, children, stat) {
+            if (error) {
+                console.log('Got error when list children of /: ' + error);
+                return;
+            }
+
+            console.log('Children of /: %j', children);
         });
-        */
     }
 });
 

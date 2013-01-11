@@ -67,7 +67,6 @@ function Client(connectionString, options, stateListener) {
         connectionString,
         options,
         function (state) {
-            console.log('Current connection manager state is: %s', state);
             self.emit('state', state);
         }
     );
@@ -125,11 +124,11 @@ Client.prototype.getChildren = function (path, watcher, callback) {
     requestHeader.type = jute.OPERATION_CODES.GET_CHILDREN2;
     requestPayload.path = path;
     requestPayload.watch = false;
-    requestPayload.callback = callback;
 
     this.connectionManager.queuePacket({
         request : new jute.Request(requestHeader, requestPayload),
-        response : new jute.Response(responseHeader, responsePayload)
+        response : new jute.Response(responseHeader, responsePayload),
+        callback : callback
     });
 };
 
