@@ -34,7 +34,7 @@ var STATES = {
 };
 
 function defaultStateListener(state) {
-    console.log('Current connection manager state is: %s', state);
+    //console.log('Current connection manager state is: %s', state);
 }
 
 /**
