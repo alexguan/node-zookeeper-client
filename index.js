@@ -105,6 +105,7 @@ Client.prototype.create = function (path, acls, flags, data, callback) {
         data = undefined;
     }
 
+    // TODO, MAKE ACLS, FLAGS, DATA OPTIONAL IN A OBJECT.
     if (!path || typeof path !== 'string') {
         throw new Error('path must be a non-empty string.');
     }
@@ -209,6 +210,7 @@ Client.prototype.getChildren = function (path, watcher, callback) {
         throw new Error('callback must be function.');
     }
 
+    /*
     var requestHeader = new jute.protocol.RequestHeader(),
         requestPayload = new jute.protocol.GetChildren2Request(),
         responseHeader = new jute.protocol.ReplyHeader(),
@@ -224,6 +226,21 @@ Client.prototype.getChildren = function (path, watcher, callback) {
         request : new jute.Request(requestHeader, requestPayload),
         response : new jute.Response(responseHeader, responsePayload),
         callback : callback
+    });
+    */
+
+    var request = jute.createRequest(jute.OP_CODES.GET_CHILDREN2);
+
+    request.payload.path = path;
+    request.watch = false;
+
+    this.connectionManager.queue(request, function (error, response) {
+        if (error) {
+            callback(error);
+            return;
+        }
+
+        callback(null, response.payload.children, response.payload.stat);
     });
 };
 
