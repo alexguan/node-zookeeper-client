@@ -118,21 +118,27 @@ Client.prototype.create = function (path, acls, flags, data, callback) {
         throw new Error('flags must be a number.');
     }
 
-    var requestHeader = new jute.protocol.RequestHeader(),
-        requestPayload = new jute.protocol.CreateRequest(),
-        responseHeader = new jute.protocol.ReplyHeader(),
-        responsePayload = new jute.protocol.CreateResponse();
 
-    requestHeader.type = jute.OPERATION_CODES.CREATE;
-    requestPayload.path = path;
-    requestPayload.acl = acls;
-    requestPayload.flags = flags;
-    requestPayload.data = data;
+    var header = new jute.protocol.RequestHeader(),
+        payload = new jute.protocol.CreateRequest(),
+        request;
 
-    this.connectionManager.queuePacket({
-        request : new jute.Request(requestHeader, requestPayload),
-        response : new jute.Response(responseHeader, responsePayload),
-        callback : callback
+    header.type = jute.OP_CODES.CREATE;
+
+    payload.path = path;
+    payload.acl = acls;
+    payload.flags = flags;
+    payload.data = data;
+
+    request = new jute.Request(header, payload);
+
+    this.connectionManager.queue(request, function (error, response) {
+        if (error) {
+            callback(error);
+            return;
+        }
+
+        callback(null, response.payload.path);
     });
 };
 
@@ -163,18 +169,25 @@ Client.prototype.remove = function (path, version, callback) {
         throw new Error('version must be a number.');
     }
 
-    var requestHeader = new jute.protocol.RequestHeader(),
-        requestPayload = new jute.protocol.DeleteRequest(),
-        responseHeader = new jute.protocol.ReplyHeader();
 
-    requestHeader.type = jute.OPERATION_CODES.DELETE;
-    requestPayload.path = path;
-    requestPayload.version = version;
+    var header = new jute.protocol.RequestHeader(),
+        payload = new jute.protocol.DeleteRequest(),
+        request;
 
-    this.connectionManager.queuePacket({
-        request : new jute.Request(requestHeader, requestPayload),
-        response : new jute.Response(responseHeader, null),
-        callback : callback
+    header.type = jute.OP_CODES.DELETE;
+
+    payload.path = path;
+    payload.version = version;
+
+    request = new jute.Request(header, payload);
+
+    this.connectionManager.queue(request, function (error, response) {
+        if (error) {
+            callback(error);
+            return;
+        }
+
+        callback(null);
     });
 };
 
@@ -210,29 +223,17 @@ Client.prototype.getChildren = function (path, watcher, callback) {
         throw new Error('callback must be function.');
     }
 
-    /*
-    var requestHeader = new jute.protocol.RequestHeader(),
-        requestPayload = new jute.protocol.GetChildren2Request(),
-        responseHeader = new jute.protocol.ReplyHeader(),
-        responsePayload = new jute.protocol.GetChildren2Response();
 
-    requestHeader.type = jute.OPERATION_CODES.GET_CHILDREN2;
-    requestPayload.path = path;
-    requestPayload.watch = false;
+    var header = new jute.protocol.RequestHeader(),
+        payload = new jute.protocol.GetChildren2Request(),
+        request;
 
-    // TODO: CHANGE THIS TO request(request object) and connection manager
-    // should create the response object.
-    this.connectionManager.queuePacket({
-        request : new jute.Request(requestHeader, requestPayload),
-        response : new jute.Response(responseHeader, responsePayload),
-        callback : callback
-    });
-    */
+    header.type = jute.OP_CODES.GET_CHILDREN2;
 
-    var request = jute.createRequest(jute.OP_CODES.GET_CHILDREN2);
+    payload.path = path;
+    payload.watch = false;
 
-    request.payload.path = path;
-    request.watch = false;
+    request = new jute.Request(header, payload);
 
     this.connectionManager.queue(request, function (error, response) {
         if (error) {
