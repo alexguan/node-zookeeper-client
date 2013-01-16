@@ -73,6 +73,14 @@
         "ExistsResponse" : [
             { "name" : "stat", "type" : "data.Stat" }
         ],
+        "SetDataRequest" : [
+            { "name" : "path", "type" : "ustring" },
+            { "name" : "data", "type" : "buffer" },
+            { "name" : "version", "type" : "int" }
+        ],
+        "SetDataResponse" : [
+            { "name" : "stat", "type" : "data.Stat" }
+        ],
         "WatcherEvent" : [
             { "name" : "type", "type" : "int" },
             { "name" : "state", "type" : "int" },

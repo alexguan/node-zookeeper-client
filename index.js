@@ -25,6 +25,8 @@ var CLIENT_DEFAULT_OPTIONS = {
     spinDelay : 1000 // 1 second
 };
 
+var DATA_SIZE_LIMIT = 1048576; // 1 mega bytes.
+
 var STATES = {
     DISCONNECTED : 0,
     SYNC_CONNECTED : 3,
@@ -192,6 +194,12 @@ Client.prototype.create = function (path, acls, flags, data, callback) {
         throw new Error('flags must be a number.');
     }
 
+    if (Buffer.isBuffer(data) && data.length > DATA_SIZE_LIMIT) {
+        throw new Error(
+            'data must be equal of smaller than ' + DATA_SIZE_LIMIT + ' bytes.'
+        );
+    }
+
 
     var header = new jute.protocol.RequestHeader(),
         payload = new jute.protocol.CreateRequest(),
@@ -216,6 +224,67 @@ Client.prototype.create = function (path, acls, flags, data, callback) {
     });
 };
 
+/**
+ * Set the data for the znode of the given path if such a node exists and the
+ * given version matches the version of the node (if the given version is -1,
+ * it matches any node's versions).
+ *
+ * The callback Return the stat of the node. This operation, if successful,
+ * will trigger all the watches on the node of the given path left by getData
+ * calls.
+ *
+ * The maximum allowable size of the data array is 1 MB (1,048,576 bytes).
+ *
+ * callback prototype:
+ * callback(error, stat)
+ *
+ * @method setData
+ * @param path {String} The znode path.
+ * @param data {Buffer} The data buffer.
+ * @param version {Number} The version of the znode, optional, defaults to -1.
+ * @param callback {Function} The callback function.
+ */
+Client.prototype.setData = function (path, data, version, callback) {
+    if (!callback) {
+        callback = version;
+        version = -1;
+    }
+
+    if (!path || typeof path !== 'string') {
+        throw new Error('path must be a non-empty string.');
+    }
+
+    if (Buffer.isBuffer(data) && data.length > DATA_SIZE_LIMIT) {
+        throw new Error(
+            'data must be equal of smaller than ' + DATA_SIZE_LIMIT + ' bytes.'
+        );
+    }
+
+    if (typeof version !== 'number') {
+        throw new Error('version must be a valid number.');
+    }
+
+    var header = new jute.protocol.RequestHeader(),
+        payload = new jute.protocol.SetDataRequest(),
+        request;
+
+    header.type = jute.OP_CODES.SET_DATA;
+
+    payload.path = path;
+    payload.data = data;
+    payload.version = version;
+
+    request = new jute.Request(header, payload);
+
+    this.connectionManager.queue(request, function (error, response) {
+        if (error) {
+            callback(error);
+            return;
+        }
+
+        callback(null, response.payload.stat);
+    });
+};
 
 /**
  * Delete a znode with the given path. If version is not -1, the request will
@@ -226,7 +295,7 @@ Client.prototype.create = function (path, acls, flags, data, callback) {
  *
  * @method delete
  * @param path {String} The znode path.
- * @param flags {Number} The version of the znode, optional, defaults to -1.
+ * @param version {Number} The version of the znode, optional, defaults to -1.
  * @param callback {Function} The callback function.
  */
 Client.prototype.remove = function (path, version, callback) {
