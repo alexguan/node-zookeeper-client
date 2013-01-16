@@ -266,6 +266,72 @@ Client.prototype.remove = function (path, version, callback) {
 };
 
 /**
+ * Check the existence of a znode. The callback will be invoked with the
+ * stat of the given path, or null if node such znode exists.
+ *
+ * If the watcher function is provided and the call is successful (no error
+ * from callback), a watcher will be placed on the node with the given path.
+ * The watcher will be triggered by a successful operation that creates/delete
+ * the node or sets the data on the node.
+ *
+ * watcher prototype:
+ * watcher(type, path)
+ *
+ * callback prototype:
+ * callback(error, Stat)
+ *
+ * @method exists
+ * @param path {String} The znode path.
+ * @param watcher {Function} The watcher function.
+ * @param callback {Function} The callback function.
+ */
+Client.prototype.exists = function (path, watcher, callback) {
+    if (!callback) {
+        callback = watcher;
+        watcher = undefined;
+    }
+
+    if (!path || typeof path !== 'string') {
+        throw new Error('path must be a non-empty string.');
+    }
+
+    if (typeof callback !== 'function') {
+        throw new Error('callback must be function.');
+    }
+
+
+    var self = this,
+        header = new jute.protocol.RequestHeader(),
+        payload = new jute.protocol.ExistsRequest(),
+        request;
+
+    header.type = jute.OP_CODES.EXISTS;
+
+    payload.path = path;
+    payload.watch = (typeof watcher === 'function');
+
+    request = new jute.Request(header, payload);
+
+    self.connectionManager.queue(request, function (error, response) {
+        // FIXME, USE ERROR CONSTANTS
+        if (error && response.header.err !== -101) {
+            callback(error);
+            return;
+        }
+
+        if (watcher) {
+            registerWatcher(self, path, EVENTS.NODE_CREATED, watcher);
+            registerWatcher(self, path, EVENTS.NODE_DELETED, watcher);
+            registerWatcher(self, path, EVENTS.NODE_DATA_CHANGED, watcher);
+        }
+
+        callback(
+            null,
+            response.header.err === -101 ? null : response.payload.stat
+        );
+    });
+};
+/**
  * For the given znode path, return the children list and the stat.
  *
  * If the watcher callback is provided and the method completes succesfully,
@@ -277,7 +343,7 @@ Client.prototype.remove = function (path, version, callback) {
  * callback(error, children, stat);
  *
  * watcher prototype:
- * callback(path);
+ * callback(type, path);
  *
  * @method getChildren
  * @param path {String} The znode path.

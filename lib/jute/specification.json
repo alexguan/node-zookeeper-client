@@ -66,6 +66,13 @@
             { "name" : "children", "type" : "vector<ustring>" },
             { "name" : "stat", "type" : "data.Stat" }
         ],
+        "ExistsRequest" : [
+            { "name" : "path", "type" : "ustring" },
+            { "name" : "watch", "type" : "boolean" }
+        ],
+        "ExistsResponse" : [
+            { "name" : "stat", "type" : "data.Stat" }
+        ],
         "WatcherEvent" : [
             { "name" : "type", "type" : "int" },
             { "name" : "state", "type" : "int" },
