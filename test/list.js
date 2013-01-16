@@ -10,17 +10,29 @@ var client = zookeeper.createClient(
 
 var path = process.argv[3];
 
-client.on('state', function (state) {
-    if (state === 2) {
-        console.log('Connected to the server.');
-        client.getChildren(path, function (error, children, stat) {
+
+function listChildren(client, path) {
+    client.getChildren(
+        path,
+        function (type, p) {
+            console.log('Got event: %s, path %s', type, p);
+            listChildren(client, path);
+        },
+        function (error, children, stat) {
             if (error) {
                 console.log('Got error when listing children: ' + error);
                 return;
             }
 
             console.log('Children of %s: %j', path, children);
-        });
+        }
+    );
+}
+
+client.on('state', function (state) {
+    if (state === 2) {
+        console.log('Connected to the server.');
+        listChildren(client, path);
     }
 });
 

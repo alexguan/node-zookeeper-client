@@ -33,9 +33,79 @@ var STATES = {
     EXPIRED : -122
 };
 
+var EVENTS = {
+    NODE_CREATED : 1,
+    NODE_DELETED : 2,
+    NODE_DATA_CHANGED : 3,
+    NODE_CHILDREN_CHANGED : 4
+};
+
 function defaultStateListener(state) {
     //console.log('Current connection manager state is: %s', state);
 }
+
+// TODO, support chrootPath
+
+
+function registerWatcher(self, path, type, watcher) {
+    self.watchers = self.watchers || {};
+    self.watchers[path] = self.watchers[path] || {};
+
+    switch (type) {
+    case EVENTS.NODE_CREATED:
+        self.watchers[path].created =
+            self.watchers[path].created || new events.EventEmitter();
+        self.watchers[path].created.once('path', watcher);
+        break;
+    case EVENTS.NODE_DELETED:
+        self.watchers[path].deleted =
+            self.watchers[path].deleted || new events.EventEmitter();
+        self.watchers[path].deleted.once('path', watcher);
+        break;
+    case EVENTS.NODE_DATA_CHANGED:
+        self.watchers[path].dataChanged =
+            self.watchers[path].dataChanged || new events.EventEmitter();
+        self.watchers[path].dataChanged.once('path', watcher);
+        break;
+    case EVENTS.NODE_CHILDREN_CHANGED:
+        self.watchers[path].childrenChanged =
+            self.watchers[path].childrenChanged || new events.EventEmitter();
+        self.watchers[path].childrenChanged.once('path', watcher);
+        break;
+    default:
+        throw new Error('Unknown event type: ' + type);
+    }
+}
+
+function emitWatcherEvent(self, event) {
+    var watchers = self.watchers[event.path],
+        emitter;
+
+    if (!watchers) {
+        console.log('Weird, no registered watcher found for event: ' + event);
+        return;
+    }
+
+    switch (event.type) {
+    case EVENTS.NODE_CREATED:
+        emitter = watchers.created;
+        break;
+    case EVENTS.NODE_DELETED:
+        emitter = watchers.deleted;
+        break;
+    case EVENTS.NODE_DATA_CHANGED:
+        emitter = watchers.dataChanged;
+        break;
+    case EVENTS.NODE_CHILDREN_CHANGED:
+        emitter = watchers.childrenChanged;
+        break;
+    default:
+        throw new Error('Unknown event type: ' + event.type);
+    }
+
+    emitter.emit('path', event.type, event.path);
+}
+
 
 /**
  * The zookeeper client constructor.
@@ -63,7 +133,7 @@ function Client(connectionString, options, stateListener) {
 
     var self = this;
 
-    this.connectionManager = new ConnectionManager(
+    self.connectionManager = new ConnectionManager(
         connectionString,
         options,
         function (state) {
@@ -71,11 +141,15 @@ function Client(connectionString, options, stateListener) {
         }
     );
 
-    this.options = options;
-    this.state = STATES.DISCONNECTED;
+    self.connectionManager.on('notification', function (event) {
+        emitWatcherEvent(self, event);
+    });
+
+    self.options = options;
+    self.state = STATES.DISCONNECTED;
 
     // TODO: Need to make sure we only have one listener for state.
-    this.on('state', stateListener);
+    self.on('state', stateListener);
 }
 
 util.inherits(Client, events.EventEmitter);
@@ -203,6 +277,7 @@ Client.prototype.remove = function (path, version, callback) {
  * callback(error, children, stat);
  *
  * watcher prototype:
+ * callback(path);
  *
  * @method getChildren
  * @param path {String} The znode path.
@@ -224,21 +299,27 @@ Client.prototype.getChildren = function (path, watcher, callback) {
     }
 
 
-    var header = new jute.protocol.RequestHeader(),
+    var self = this,
+        header = new jute.protocol.RequestHeader(),
         payload = new jute.protocol.GetChildren2Request(),
         request;
 
     header.type = jute.OP_CODES.GET_CHILDREN2;
 
     payload.path = path;
-    payload.watch = false;
+    payload.watch = (typeof watcher === 'function');
 
     request = new jute.Request(header, payload);
 
-    this.connectionManager.queue(request, function (error, response) {
+    self.connectionManager.queue(request, function (error, response) {
         if (error) {
             callback(error);
             return;
+        }
+
+        if (watcher) {
+            registerWatcher(self, path, EVENTS.NODE_CHILDREN_CHANGED, watcher);
+            registerWatcher(self, path, EVENTS.NODE_DELETED, watcher);
         }
 
         callback(null, response.payload.children, response.payload.stat);
@@ -274,3 +355,4 @@ function createClient(connectionString, options, stateListener) {
 exports.createClient = createClient;
 exports.jute = jute;
 exports.STATES = STATES;
+exports.EVENTS = EVENTS;
