@@ -225,6 +225,54 @@ Client.prototype.create = function (path, acls, flags, data, callback) {
 };
 
 /**
+ * Delete a znode with the given path. If version is not -1, the request will
+ * fail when the provided version does not match the server version.
+ *
+ * callback prototype:
+ * callback(error)
+ *
+ * @method delete
+ * @param path {String} The znode path.
+ * @param version {Number} The version of the znode, optional, defaults to -1.
+ * @param callback {Function} The callback function.
+ */
+Client.prototype.remove = function (path, version, callback) {
+    if (!callback) {
+        callback = version;
+        version = -1;
+    }
+
+    if (!path || typeof path !== 'string') {
+        throw new Error('path must be a non-empty string.');
+    }
+
+    if (typeof version !== 'number') {
+        throw new Error('version must be a number.');
+    }
+
+
+    var header = new jute.protocol.RequestHeader(),
+        payload = new jute.protocol.DeleteRequest(),
+        request;
+
+    header.type = jute.OP_CODES.DELETE;
+
+    payload.path = path;
+    payload.version = version;
+
+    request = new jute.Request(header, payload);
+
+    this.connectionManager.queue(request, function (error, response) {
+        if (error) {
+            callback(error);
+            return;
+        }
+
+        callback(null);
+    });
+};
+
+/**
  * Set the data for the znode of the given path if such a node exists and the
  * given version matches the version of the node (if the given version is -1,
  * it matches any node's versions).
@@ -287,50 +335,64 @@ Client.prototype.setData = function (path, data, version, callback) {
 };
 
 /**
- * Delete a znode with the given path. If version is not -1, the request will
- * fail when the provided version does not match the server version.
+ *
+ * Return the data and the stat of the znode of the given path.
+ *
+ * If the watcher is provided and the call is successful (no error), the watcher
+ * will be left on the znode with the given path.
+ *
+ * The watch will be triggered by a successful operation that sets data on
+ * the node, or deletes the node.
  *
  * callback prototype:
- * callback(error)
+ * callback(error, data, stat)
  *
- * @method delete
+ * watcher prototype:
+ * watcher(type, path);
+ *
+ * @method getData
  * @param path {String} The znode path.
- * @param version {Number} The version of the znode, optional, defaults to -1.
+ * @param watcher {Function} The watcher function, optional.
  * @param callback {Function} The callback function.
  */
-Client.prototype.remove = function (path, version, callback) {
+Client.prototype.getData = function (path, watcher, callback) {
     if (!callback) {
-        callback = version;
-        version = -1;
+        callback = watcher;
+        watcher = undefined;
     }
 
     if (!path || typeof path !== 'string') {
         throw new Error('path must be a non-empty string.');
     }
 
-    if (typeof version !== 'number') {
-        throw new Error('version must be a number.');
+    if (typeof callback !== 'function') {
+        throw new Error('callback must be function.');
     }
 
-
-    var header = new jute.protocol.RequestHeader(),
-        payload = new jute.protocol.DeleteRequest(),
+    var self = this,
+        header = new jute.protocol.RequestHeader(),
+        payload = new jute.protocol.GetDataRequest(),
         request;
 
-    header.type = jute.OP_CODES.DELETE;
+    header.type = jute.OP_CODES.GET_DATA;
 
     payload.path = path;
-    payload.version = version;
+    payload.watch = (typeof watcher === 'function');
 
     request = new jute.Request(header, payload);
 
-    this.connectionManager.queue(request, function (error, response) {
+    self.connectionManager.queue(request, function (error, response) {
         if (error) {
             callback(error);
             return;
         }
 
-        callback(null);
+        if (watcher) {
+            registerWatcher(self, path, EVENTS.NODE_DELETED, watcher);
+            registerWatcher(self, path, EVENTS.NODE_DATA_CHANGED, watcher);
+        }
+
+        callback(null, response.payload.data, response.payload.stat);
     });
 };
 
@@ -351,7 +413,7 @@ Client.prototype.remove = function (path, version, callback) {
  *
  * @method exists
  * @param path {String} The znode path.
- * @param watcher {Function} The watcher function.
+ * @param watcher {Function} The watcher function, optional.
  * @param callback {Function} The callback function.
  */
 Client.prototype.exists = function (path, watcher, callback) {

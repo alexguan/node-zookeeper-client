@@ -81,6 +81,14 @@
         "SetDataResponse" : [
             { "name" : "stat", "type" : "data.Stat" }
         ],
+        "GetDataRequest" : [
+            { "name" : "path", "type" : "ustring" },
+            { "name" : "watch", "type" : "boolean" }
+        ],
+        "GetDataResponse" : [
+            { "name" : "data", "type" : "buffer" },
+            { "name" : "stat", "type" : "data.Stat" }
+        ],
         "WatcherEvent" : [
             { "name" : "type", "type" : "int" },
             { "name" : "state", "type" : "int" },
