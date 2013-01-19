@@ -156,8 +156,13 @@ function Client(connectionString, options, stateListener) {
 
 util.inherits(Client, events.EventEmitter);
 
+// We properly should not have this one
 Client.prototype.connect = function () {
-    this.connectionManager.start();
+    this.connectionManager.connect();
+};
+
+Client.prototype.close = function () {
+    this.connectionManager.close();
 };
 
 /**

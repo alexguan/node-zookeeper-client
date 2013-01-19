@@ -28,6 +28,7 @@ client.on('state', function (state) {
             }
 
             console.log('Created node: %s', path);
+            client.close();
         });
     }
 });
