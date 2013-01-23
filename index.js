@@ -18,7 +18,9 @@ var u = require('underscore');
 
 var jute = require('./lib/jute');
 var State = require('./lib/State.js');
+var Exception = require('./lib/Exception');
 var ConnectionManager = require('./lib/ConnectionManager.js');
+
 
 // Constants.
 var CLIENT_DEFAULT_OPTIONS = {
@@ -616,4 +618,5 @@ function createClient(connectionString, options, stateListener) {
 exports.createClient = createClient;
 exports.jute = jute;
 exports.State = State;
+exports.Exception = Exception;
 exports.EVENTS = EVENTS;

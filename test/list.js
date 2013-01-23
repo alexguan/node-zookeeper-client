@@ -20,7 +20,8 @@ function listChildren(client, path) {
         },
         function (error, children, stat) {
             if (error) {
-                console.log('Got error when listing children: ' + error);
+                console.log('Got error when listing children:');
+                console.log(error.stack);
                 return;
             }
 
