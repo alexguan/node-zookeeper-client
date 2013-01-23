@@ -20,6 +20,7 @@ client.on('state', function (state) {
             }
 
             console.log('Znode %s is deleted.', path);
+            client.close();
         });
     }
 });
