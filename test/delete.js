@@ -11,7 +11,7 @@ var client = zookeeper.createClient(
 var path = process.argv[3];
 
 client.on('state', function (state) {
-    if (state === 2) {
+    if (state === zookeeper.State.SYNC_CONNECTED) {
         console.log('Connected to the server.');
         client.remove(path, function (error) {
             if (error) {

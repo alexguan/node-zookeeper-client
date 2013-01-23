@@ -18,7 +18,7 @@ var acls = [
 var flags = process.argv[4] ? parseInt(process.argv[4], 10) : 0;
 
 client.on('state', function (state) {
-    if (state === 2) {
+    if (state === zookeeper.State.SYNC_CONNECTED) {
         console.log('Connected to the server.');
 
         client.create(path, acls, flags, function (error, path) {

@@ -30,7 +30,8 @@ function listChildren(client, path) {
 }
 
 client.on('state', function (state) {
-    if (state === 2) {
+    console.log('Client state changed to: ' + state);
+    if (state === zookeeper.State.SYNC_CONNECTED) {
         console.log('Connected to the server.');
         listChildren(client, path);
     }

@@ -17,6 +17,7 @@ var net = require('net');
 var u = require('underscore');
 
 var jute = require('./lib/jute');
+var State = require('./lib/State.js');
 var ConnectionManager = require('./lib/ConnectionManager.js');
 
 // Constants.
@@ -27,13 +28,16 @@ var CLIENT_DEFAULT_OPTIONS = {
 
 var DATA_SIZE_LIMIT = 1048576; // 1 mega bytes.
 
+/*
 var STATES = {
-    DISCONNECTED : 0,
-    SYNC_CONNECTED : 3,
-    AUTH_FAILED : 4,
-    CONNECTED_READ_ONLY : 5,
-    EXPIRED : -122
+    DISCONNECTED : new State('DISCONNECTED', 0),
+    SYNC_CONNECTED : new State('SYNC_CONNECTED', 3),
+    AUTH_FAILED : new State('AUTH_FAILED', 4),
+    CONNECTED_READ_ONLY : new State('CONNECTED_READ_ONLY', 5),
+    SASL_AUTHENTICATED : new State('SASL_AUTHENTICATED', 6),
+    EXPIRED : new State('EXPIRED', -122)
 };
+*/
 
 var EVENTS = {
     NODE_CREATED : 1,
@@ -167,25 +171,22 @@ function Client(connectionString, options, stateListener) {
         throw new Error('stateListener must be a valid function.');
     }
 
-    var self = this;
-
-    self.connectionManager = new ConnectionManager(
+    this.connectionManager = new ConnectionManager(
         connectionString,
         options,
-        function (state) {
-            self.emit('state', state);
-        }
+        this.onConnectionManagerState.bind(this)
     );
 
-    self.connectionManager.on('notification', function (event) {
-        emitWatcherEvent(self, event);
-    });
+    this.connectionManager.on(
+        'notification',
+        this.onConnectionManagerNotification.bind(this)
+    );
 
-    self.options = options;
-    self.state = STATES.DISCONNECTED;
+    this.options = options;
+    this.state = State.DISCONNECTED;
 
     // TODO: Need to make sure we only have one listener for state.
-    self.on('state', stateListener);
+    this.on('state', stateListener);
 }
 
 util.inherits(Client, events.EventEmitter);
@@ -198,6 +199,42 @@ Client.prototype.connect = function () {
 Client.prototype.close = function () {
     this.connectionManager.close();
 };
+
+Client.prototype.onConnectionManagerState = function (connectionManagerState) {
+    var state;
+
+    // Convert connection state to ZooKeeper state.
+    switch (connectionManagerState) {
+    case ConnectionManager.STATES.DISCONNECTED:
+        state = State.DISCONNECTED;
+        break;
+    case ConnectionManager.STATES.CONNECTED:
+        state = State.SYNC_CONNECTED;
+        break;
+    case ConnectionManager.STATES.CONNECTED_READ_ONLY:
+        state = State.CONNECTED_READ_ONLY;
+        break;
+    case ConnectionManager.STATES.SESSION_EXPIRED:
+        state = State.EXPIRED;
+        break;
+    case ConnectionManager.STATES.AUTHENTICATION_FAILED:
+        state = State.AUTH_FAILED;
+        break;
+    default:
+        // Not a event in which client is interested, so skip it.
+        return;
+    }
+
+    if (this.state !== state) {
+        this.state = state;
+        this.emit('state', this.state);
+    }
+};
+
+Client.prototype.onConnectionManagerNotification = function (event) {
+    emitWatcherEvent(this, event);
+};
+
 
 /**
  * Create a znode with the given path, data and ACL.
@@ -578,5 +615,5 @@ function createClient(connectionString, options, stateListener) {
 
 exports.createClient = createClient;
 exports.jute = jute;
-exports.STATES = STATES;
+exports.State = State;
 exports.EVENTS = EVENTS;

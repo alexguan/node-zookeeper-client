@@ -35,7 +35,7 @@ function getData(client, path) {
 }
 
 client.on('state', function (state) {
-    if (state === 2) {
+    if (state === zookeeper.State.SYNC_CONNECTED) {
         console.log('Connected to the server.');
 
         getData(client, path);

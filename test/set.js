@@ -12,7 +12,7 @@ var path = process.argv[3];
 var data = new Buffer(process.argv[4]);
 
 client.on('state', function (state) {
-    if (state === 2) {
+    if (state === zookeeper.State.SYNC_CONNECTED) {
         console.log('Connected to the server.');
 
         client.setData(path, data, function (error, stat) {
