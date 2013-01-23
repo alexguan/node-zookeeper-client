@@ -108,6 +108,40 @@ function emitWatcherEvent(self, event) {
     emitter.emit('path', event.type, event.path);
 }
 
+/**
+ * Validate the znode path, throws out Error object when the path is invalid.
+ *
+ * @method validatePath
+ */
+function validatePath(path) {
+    if (!path || typeof path !== 'string') {
+        throw new Error('path must be a non-empty string.');
+    }
+
+    if (path[0] !== '/') {
+        throw new Error('path must start with / character.');
+    }
+
+    // Shortcut, no need to check more since the path is the root.
+    if (path.length === 1) {
+        return;
+    }
+
+    if (path[path.length - 1] === '/') {
+        throw new Error('path must not end with / character.');
+    }
+
+    if (/\/\//.test(path)) {
+        throw new Error('path must not contain empty node name.');
+    }
+
+    if (/\/\.\.\//.test(path)) {
+        throw new Error('path must not contain relative paths.');
+    }
+
+    // TODO filter out special characters
+}
+
 
 /**
  * The zookeeper client constructor.
@@ -187,9 +221,7 @@ Client.prototype.create = function (path, acls, flags, data, callback) {
     }
 
     // TODO, MAKE ACLS, FLAGS, DATA OPTIONAL IN A OBJECT.
-    if (!path || typeof path !== 'string') {
-        throw new Error('path must be a non-empty string.');
-    }
+    validatePath(path);
 
     if (!Array.isArray(acls) || acls.length < 1) {
         throw new Error('acls must be a non-empty array.');
@@ -247,9 +279,7 @@ Client.prototype.remove = function (path, version, callback) {
         version = -1;
     }
 
-    if (!path || typeof path !== 'string') {
-        throw new Error('path must be a non-empty string.');
-    }
+    validatePath(path);
 
     if (typeof version !== 'number') {
         throw new Error('version must be a number.');
@@ -303,9 +333,7 @@ Client.prototype.setData = function (path, data, version, callback) {
         version = -1;
     }
 
-    if (!path || typeof path !== 'string') {
-        throw new Error('path must be a non-empty string.');
-    }
+    validatePath(path);
 
     if (Buffer.isBuffer(data) && data.length > DATA_SIZE_LIMIT) {
         throw new Error(
@@ -366,9 +394,7 @@ Client.prototype.getData = function (path, watcher, callback) {
         watcher = undefined;
     }
 
-    if (!path || typeof path !== 'string') {
-        throw new Error('path must be a non-empty string.');
-    }
+    validatePath(path);
 
     if (typeof callback !== 'function') {
         throw new Error('callback must be function.');
@@ -427,9 +453,7 @@ Client.prototype.exists = function (path, watcher, callback) {
         watcher = undefined;
     }
 
-    if (!path || typeof path !== 'string') {
-        throw new Error('path must be a non-empty string.');
-    }
+    validatePath(path);
 
     if (typeof callback !== 'function') {
         throw new Error('callback must be function.');
@@ -492,9 +516,7 @@ Client.prototype.getChildren = function (path, watcher, callback) {
         watcher = undefined;
     }
 
-    if (!path || typeof path !== 'string') {
-        throw new Error('path must be a non-empty string.');
-    }
+    validatePath(path);
 
     if (typeof callback !== 'function') {
         throw new Error('callback must be function.');
