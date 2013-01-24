@@ -17,6 +17,7 @@ var net = require('net');
 var u = require('underscore');
 
 var jute = require('./lib/jute');
+var Event = require('./lib/Event.js');
 var State = require('./lib/State.js');
 var Exception = require('./lib/Exception');
 var ConnectionManager = require('./lib/ConnectionManager.js');
@@ -30,23 +31,6 @@ var CLIENT_DEFAULT_OPTIONS = {
 
 var DATA_SIZE_LIMIT = 1048576; // 1 mega bytes.
 
-/*
-var STATES = {
-    DISCONNECTED : new State('DISCONNECTED', 0),
-    SYNC_CONNECTED : new State('SYNC_CONNECTED', 3),
-    AUTH_FAILED : new State('AUTH_FAILED', 4),
-    CONNECTED_READ_ONLY : new State('CONNECTED_READ_ONLY', 5),
-    SASL_AUTHENTICATED : new State('SASL_AUTHENTICATED', 6),
-    EXPIRED : new State('EXPIRED', -122)
-};
-*/
-
-var EVENTS = {
-    NODE_CREATED : 1,
-    NODE_DELETED : 2,
-    NODE_DATA_CHANGED : 3,
-    NODE_CHILDREN_CHANGED : 4
-};
 
 function defaultStateListener(state) {
     //console.log('Current connection manager state is: %s', state);
@@ -60,22 +44,22 @@ function registerWatcher(self, path, type, watcher) {
     self.watchers[path] = self.watchers[path] || {};
 
     switch (type) {
-    case EVENTS.NODE_CREATED:
+    case Event.NODE_CREATED:
         self.watchers[path].created =
             self.watchers[path].created || new events.EventEmitter();
         self.watchers[path].created.once('path', watcher);
         break;
-    case EVENTS.NODE_DELETED:
+    case Event.NODE_DELETED:
         self.watchers[path].deleted =
             self.watchers[path].deleted || new events.EventEmitter();
         self.watchers[path].deleted.once('path', watcher);
         break;
-    case EVENTS.NODE_DATA_CHANGED:
+    case Event.NODE_DATA_CHANGED:
         self.watchers[path].dataChanged =
             self.watchers[path].dataChanged || new events.EventEmitter();
         self.watchers[path].dataChanged.once('path', watcher);
         break;
-    case EVENTS.NODE_CHILDREN_CHANGED:
+    case Event.NODE_CHILDREN_CHANGED:
         self.watchers[path].childrenChanged =
             self.watchers[path].childrenChanged || new events.EventEmitter();
         self.watchers[path].childrenChanged.once('path', watcher);
@@ -85,33 +69,38 @@ function registerWatcher(self, path, type, watcher) {
     }
 }
 
-function emitWatcherEvent(self, event) {
-    var watchers = self.watchers[event.path],
+function emitWatcherEvent(self, watcherEvent) {
+    var watchers = self.watchers[watcherEvent.path],
+        event,
         emitter;
 
     if (!watchers) {
-        console.log('Weird, no registered watcher found for event: ' + event);
+        console.log(
+            'Weird, no registered watcher found for event: ' + watcherEvent
+        );
         return;
     }
 
+    event = Event.create(watcherEvent);
+
     switch (event.type) {
-    case EVENTS.NODE_CREATED:
+    case Event.NODE_CREATED:
         emitter = watchers.created;
         break;
-    case EVENTS.NODE_DELETED:
+    case Event.NODE_DELETED:
         emitter = watchers.deleted;
         break;
-    case EVENTS.NODE_DATA_CHANGED:
+    case Event.NODE_DATA_CHANGED:
         emitter = watchers.dataChanged;
         break;
-    case EVENTS.NODE_CHILDREN_CHANGED:
+    case Event.NODE_CHILDREN_CHANGED:
         emitter = watchers.childrenChanged;
         break;
     default:
         throw new Error('Unknown event type: ' + event.type);
     }
 
-    emitter.emit('path', event.type, event.path);
+    emitter.emit('path', event);
 }
 
 /**
@@ -233,8 +222,8 @@ Client.prototype.onConnectionManagerState = function (connectionManagerState) {
     }
 };
 
-Client.prototype.onConnectionManagerNotification = function (event) {
-    emitWatcherEvent(this, event);
+Client.prototype.onConnectionManagerNotification = function (notification) {
+    emitWatcherEvent(this, notification);
 };
 
 
@@ -458,8 +447,8 @@ Client.prototype.getData = function (path, watcher, callback) {
         }
 
         if (watcher) {
-            registerWatcher(self, path, EVENTS.NODE_DELETED, watcher);
-            registerWatcher(self, path, EVENTS.NODE_DATA_CHANGED, watcher);
+            registerWatcher(self, path, Event.NODE_DELETED, watcher);
+            registerWatcher(self, path, Event.NODE_DATA_CHANGED, watcher);
         }
 
         callback(null, response.payload.data, response.payload.stat);
@@ -519,9 +508,9 @@ Client.prototype.exists = function (path, watcher, callback) {
         }
 
         if (watcher) {
-            registerWatcher(self, path, EVENTS.NODE_CREATED, watcher);
-            registerWatcher(self, path, EVENTS.NODE_DELETED, watcher);
-            registerWatcher(self, path, EVENTS.NODE_DATA_CHANGED, watcher);
+            registerWatcher(self, path, Event.NODE_CREATED, watcher);
+            registerWatcher(self, path, Event.NODE_DELETED, watcher);
+            registerWatcher(self, path, Event.NODE_DATA_CHANGED, watcher);
         }
 
         callback(
@@ -581,8 +570,8 @@ Client.prototype.getChildren = function (path, watcher, callback) {
         }
 
         if (watcher) {
-            registerWatcher(self, path, EVENTS.NODE_CHILDREN_CHANGED, watcher);
-            registerWatcher(self, path, EVENTS.NODE_DELETED, watcher);
+            registerWatcher(self, path, Event.NODE_CHILDREN_CHANGED, watcher);
+            registerWatcher(self, path, Event.NODE_DELETED, watcher);
         }
 
         callback(null, response.payload.children, response.payload.stat);
@@ -619,4 +608,4 @@ exports.createClient = createClient;
 exports.jute = jute;
 exports.State = State;
 exports.Exception = Exception;
-exports.EVENTS = EVENTS;
+exports.Event = Event;

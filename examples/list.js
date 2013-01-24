@@ -14,8 +14,8 @@ var path = process.argv[3];
 function listChildren(client, path) {
     client.getChildren(
         path,
-        function (type, p) {
-            console.log('Got event: %s, path %s', type, p);
+        function (event) {
+            console.log('Got event: %s', event);
             listChildren(client, path);
         },
         function (error, children, stat) {
