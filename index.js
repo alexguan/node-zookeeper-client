@@ -17,8 +17,11 @@ var net = require('net');
 var u = require('underscore');
 
 var jute = require('./lib/jute');
+var ACL = require('./lib/ACL.js');
+var Id = require('./lib/Id.js');
 var Event = require('./lib/Event.js');
 var State = require('./lib/State.js');
+var Permission = require('./lib/Permission.js');
 var Exception = require('./lib/Exception');
 var ConnectionManager = require('./lib/ConnectionManager.js');
 
@@ -273,7 +276,9 @@ Client.prototype.create = function (path, acls, flags, data, callback) {
     header.type = jute.OP_CODES.CREATE;
 
     payload.path = path;
-    payload.acl = acls;
+    payload.acl = acls.map(function (acl) {
+        return acl.toRecord();
+    });
     payload.flags = flags;
     payload.data = data;
 
@@ -605,7 +610,9 @@ function createClient(connectionString, options, stateListener) {
 
 
 exports.createClient = createClient;
-exports.jute = jute;
+exports.ACL = ACL;
+exports.Id = Id;
+exports.Permission = Permission;
 exports.State = State;
-exports.Exception = Exception;
 exports.Event = Event;
+exports.Exception = Exception;

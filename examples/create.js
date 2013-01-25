@@ -9,12 +9,15 @@ var client = zookeeper.createClient(
 );
 
 var path = process.argv[3];
+/*
 var acls = [
     new zookeeper.jute.data.ACL(
-        15,
+        zookeeper.Permission.ALL,
         new zookeeper.jute.data.Id('world', 'anyone')
     )
 ];
+*/
+var acls = zookeeper.ACL.OPEN_ACL_UNSAFE;
 var flags = process.argv[4] ? parseInt(process.argv[4], 10) : 0;
 
 client.on('state', function (state) {
