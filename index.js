@@ -22,6 +22,7 @@ var Id = require('./lib/Id.js');
 var Event = require('./lib/Event.js');
 var State = require('./lib/State.js');
 var Permission = require('./lib/Permission.js');
+var CreateMode = require('./lib/CreateMode.js');
 var Exception = require('./lib/Exception');
 var ConnectionManager = require('./lib/ConnectionManager.js');
 
@@ -241,11 +242,11 @@ Client.prototype.onConnectionManagerNotification = function (notification) {
  * @method create
  * @param path {String} The znode path.
  * @param acls {Array} The list of ACLs.
- * @param flags {Number} The creation flags.
+ * @param mode {CreateMode} The creation mode.
  * @param data {Buffer} The data buffer, optional
  * @param callback {Function} The callback function.
  */
-Client.prototype.create = function (path, acls, flags, data, callback) {
+Client.prototype.create = function (path, acls, mode, data, callback) {
     if (!callback) {
         callback = data;
         data = undefined;
@@ -258,8 +259,8 @@ Client.prototype.create = function (path, acls, flags, data, callback) {
         throw new Error('acls must be a non-empty array.');
     }
 
-    if (typeof flags !== 'number') {
-        throw new Error('flags must be a number.');
+    if (typeof mode !== 'number') {
+        throw new Error('mode must be a valid integer.');
     }
 
     if (Buffer.isBuffer(data) && data.length > DATA_SIZE_LIMIT) {
@@ -279,7 +280,7 @@ Client.prototype.create = function (path, acls, flags, data, callback) {
     payload.acl = acls.map(function (acl) {
         return acl.toRecord();
     });
-    payload.flags = flags;
+    payload.flags = mode;
     payload.data = data;
 
     request = new jute.Request(header, payload);
@@ -613,6 +614,7 @@ exports.createClient = createClient;
 exports.ACL = ACL;
 exports.Id = Id;
 exports.Permission = Permission;
+exports.CreateMode = CreateMode;
 exports.State = State;
 exports.Event = Event;
 exports.Exception = Exception;

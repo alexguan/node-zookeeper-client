@@ -9,22 +9,20 @@ var client = zookeeper.createClient(
 );
 
 var path = process.argv[3];
-/*
-var acls = [
-    new zookeeper.jute.data.ACL(
-        zookeeper.Permission.ALL,
-        new zookeeper.jute.data.Id('world', 'anyone')
-    )
-];
-*/
 var acls = zookeeper.ACL.OPEN_ACL_UNSAFE;
-var flags = process.argv[4] ? parseInt(process.argv[4], 10) : 0;
+var mode;
+
+if (process.argv[4]) {
+    mode = parseInt(process.argv[4], 10);
+} else {
+    mode = zookeeper.CreateMode.PERSISTENT;
+}
 
 client.on('state', function (state) {
     if (state === zookeeper.State.SYNC_CONNECTED) {
         console.log('Connected to the server.');
 
-        client.create(path, acls, flags, function (error, path) {
+        client.create(path, acls, mode, function (error, path) {
             if (error) {
                 console.log('Got error when create: ' + path);
                 return;
