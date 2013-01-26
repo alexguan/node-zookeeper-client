@@ -12,6 +12,7 @@ var path = process.argv[3];
 var acls = zookeeper.ACL.OPEN_ACL_UNSAFE;
 var mode;
 
+
 if (process.argv[4]) {
     mode = parseInt(process.argv[4], 10);
 } else {
@@ -24,7 +25,7 @@ client.on('state', function (state) {
 
         client.create(path, acls, mode, function (error, path) {
             if (error) {
-                console.log('Got error when create: ' + path);
+                console.log('Got error when create: ' + error);
                 return;
             }
 
