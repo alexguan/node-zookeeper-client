@@ -19,6 +19,7 @@ var u = require('underscore');
 var jute = require('./lib/jute');
 var ACL = require('./lib/ACL.js');
 var Id = require('./lib/Id.js');
+var Path = require('./lib/Path.js');
 var Event = require('./lib/Event.js');
 var State = require('./lib/State.js');
 var Permission = require('./lib/Permission.js');
@@ -39,8 +40,6 @@ var DATA_SIZE_LIMIT = 1048576; // 1 mega bytes.
 function defaultStateListener(state) {
     //console.log('Current connection manager state is: %s', state);
 }
-
-// TODO, support chrootPath
 
 
 function registerWatcher(self, path, type, watcher) {
@@ -106,41 +105,6 @@ function emitWatcherEvent(self, watcherEvent) {
 
     emitter.emit('path', event);
 }
-
-/**
- * Validate the znode path, throws out Error object when the path is invalid.
- *
- * @method validatePath
- */
-function validatePath(path) {
-    if (!path || typeof path !== 'string') {
-        throw new Error('path must be a non-empty string.');
-    }
-
-    if (path[0] !== '/') {
-        throw new Error('path must start with / character.');
-    }
-
-    // Shortcut, no need to check more since the path is the root.
-    if (path.length === 1) {
-        return;
-    }
-
-    if (path[path.length - 1] === '/') {
-        throw new Error('path must not end with / character.');
-    }
-
-    if (/\/\//.test(path)) {
-        throw new Error('path must not contain empty node name.');
-    }
-
-    if (/\/\.\.\//.test(path)) {
-        throw new Error('path must not contain relative paths.');
-    }
-
-    // TODO filter out special characters
-}
-
 
 /**
  * The zookeeper client constructor.
@@ -253,7 +217,7 @@ Client.prototype.create = function (path, acls, mode, data, callback) {
     }
 
     // TODO, MAKE ACLS, FLAGS, DATA OPTIONAL IN A OBJECT.
-    validatePath(path);
+    Path.validate(path);
 
     if (!Array.isArray(acls) || acls.length < 1) {
         throw new Error('acls must be a non-empty array.');
@@ -313,7 +277,7 @@ Client.prototype.remove = function (path, version, callback) {
         version = -1;
     }
 
-    validatePath(path);
+    Path.validate(path);
 
     if (typeof version !== 'number') {
         throw new Error('version must be a number.');
@@ -367,7 +331,7 @@ Client.prototype.setData = function (path, data, version, callback) {
         version = -1;
     }
 
-    validatePath(path);
+    Path.validate(path);
 
     if (Buffer.isBuffer(data) && data.length > DATA_SIZE_LIMIT) {
         throw new Error(
@@ -428,7 +392,7 @@ Client.prototype.getData = function (path, watcher, callback) {
         watcher = undefined;
     }
 
-    validatePath(path);
+    Path.validate(path);
 
     if (typeof callback !== 'function') {
         throw new Error('callback must be function.');
@@ -487,7 +451,7 @@ Client.prototype.exists = function (path, watcher, callback) {
         watcher = undefined;
     }
 
-    validatePath(path);
+    Path.validate(path);
 
     if (typeof callback !== 'function') {
         throw new Error('callback must be function.');
@@ -550,7 +514,7 @@ Client.prototype.getChildren = function (path, watcher, callback) {
         watcher = undefined;
     }
 
-    validatePath(path);
+    Path.validate(path);
 
     if (typeof callback !== 'function') {
         throw new Error('callback must be function.');
