@@ -237,7 +237,6 @@ Client.prototype.create = function (path, acls, mode, data, callback) {
         data = undefined;
     }
 
-    // TODO, MAKE ACLS, FLAGS, DATA OPTIONAL IN A OBJECT.
     Path.validate(path);
 
     if (!Array.isArray(acls) || acls.length < 1) {
