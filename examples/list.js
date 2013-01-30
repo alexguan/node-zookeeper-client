@@ -34,6 +34,7 @@ client.on('state', function (state) {
     console.log('Client state changed to: ' + state);
     if (state === zookeeper.State.SYNC_CONNECTED) {
         console.log('Connected to the server.');
+        //client.addAuthInfo('blah', new Buffer('127.0.0.1'));
         listChildren(client, path);
     }
 });

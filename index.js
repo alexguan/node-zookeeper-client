@@ -194,6 +194,27 @@ Client.prototype.onConnectionManagerNotification = function (notification) {
     emitWatcherEvent(this, notification);
 };
 
+/**
+ * Add the specified scheme:auth information to this client.
+ *
+ * @method addAuthInfo
+ * @param scheme {String} The authentication scheme.
+ * @param auth {Buffer} The authentication data buffer.
+ */
+Client.prototype.addAuthInfo = function (scheme, auth) {
+    if (!scheme || typeof scheme !== 'string') {
+        throw new Error('scheme must be a non-empty string.');
+    }
+
+    if (!Buffer.isBuffer(auth)) {
+        throw new Error('auth must be a valid instance of Buffer');
+    }
+
+    var buffer = new Buffer(auth.length);
+    auth.copy(buffer);
+
+    this.connectionManager.addAuthInfo(scheme, buffer);
+};
 
 /**
  * Create a znode with the given path, data and ACL.
@@ -350,7 +371,8 @@ Client.prototype.setData = function (path, data, version, callback) {
     header.type = jute.OP_CODES.SET_DATA;
 
     payload.path = path;
-    payload.data = data;
+    payload.data = new Buffer(data.length);
+    data.copy(payload.data);
     payload.version = version;
 
     request = new jute.Request(header, payload);

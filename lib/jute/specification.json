@@ -45,6 +45,11 @@
             { "name" : "zxid", "type" : "long"},
             { "name" : "err", "type" : "int"}
         ],
+        "AuthPacket" : [
+            { "name" : "type", "type" : "int" },
+            { "name" : "scheme", "type" : "ustring" },
+            { "name" : "auth", "type" : "buffer" }
+        ],
         "CreateRequest" : [
             { "name" : "path", "type" : "ustring" },
             { "name" : "data", "type" : "buffer" },

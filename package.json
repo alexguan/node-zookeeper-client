@@ -17,7 +17,6 @@
   "license": "BSD",
   "dependencies": {
     "underscore": "~1.4.3",
-    "async": "~0.1.22",
     "jsonutil": "~0.2.0"
   }
 }
