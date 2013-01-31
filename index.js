@@ -226,12 +226,12 @@ Client.prototype.addAuthInfo = function (scheme, auth) {
  *
  * @method create
  * @param path {String} The znode path.
- * @param acls {Array} The list of ACLs.
+ * @param acls {Array} The array of ACL object.
  * @param mode {CreateMode} The creation mode.
  * @param data {Buffer} The data buffer, optional
  * @param callback {Function} The callback function.
  */
-Client.prototype.create = function (path, acls, mode, data, callback) {
+Client.prototype.create = function (path, acl, mode, data, callback) {
     if (!callback) {
         callback = data;
         data = undefined;
@@ -239,7 +239,7 @@ Client.prototype.create = function (path, acls, mode, data, callback) {
 
     Path.validate(path);
 
-    if (!Array.isArray(acls) || acls.length < 1) {
+    if (!Array.isArray(acl) || acl.length < 1) {
         throw new Error('acls must be a non-empty array.');
     }
 
@@ -261,8 +261,8 @@ Client.prototype.create = function (path, acls, mode, data, callback) {
     header.type = jute.OP_CODES.CREATE;
 
     payload.path = path;
-    payload.acl = acls.map(function (acl) {
-        return acl.toRecord();
+    payload.acl = acl.map(function (item) {
+        return item.toRecord();
     });
     payload.flags = mode;
     payload.data = data;
@@ -443,6 +443,110 @@ Client.prototype.getData = function (path, watcher, callback) {
         }
 
         callback(null, response.payload.data, response.payload.stat);
+    });
+};
+
+/**
+ * Set the ACL for the znode of the given path if such a node exists and the
+ * given version matches the version of the node (if the given version is -1,
+ * it matches any node's versions).
+ *
+ * The callback returns the stat of the node. This operation.
+ *
+ * callback prototype:
+ * callback(error, stat)
+ *
+ * @method setACL
+ * @param path {String} The znode path.
+ * @param acls {Array} The array of ACL objects.
+ * @param version {Number} The version of the znode, optional, defaults to -1.
+ * @param callback {Function} The callback function.
+ */
+Client.prototype.setACL = function (path, acl, version, callback) {
+    if (!callback) {
+        callback = version;
+        version = -1;
+    }
+
+    Path.validate(path);
+
+    if (!Array.isArray(acl) || acl.length < 1) {
+        throw new Error('acl must be a non-empty array.');
+    }
+
+    if (typeof version !== 'number') {
+        throw new Error('version must be a valid number.');
+    }
+
+    var header = new jute.protocol.RequestHeader(),
+        payload = new jute.protocol.SetACLRequest(),
+        request;
+
+    header.type = jute.OP_CODES.SET_ACL;
+
+    payload.path = path;
+    payload.acl = acl.map(function (item) {
+        return item.toRecord();
+    });
+    console.dir(payload.acl);
+    payload.version = version;
+
+    request = new jute.Request(header, payload);
+
+    this.connectionManager.queue(request, function (error, response) {
+        if (error) {
+            callback(error);
+            return;
+        }
+
+        callback(null, response.payload.stat);
+    });
+};
+
+/**
+ *
+ * Return the ACL and the stat of the znode of the given path.
+ *
+ * callback prototype:
+ * callback(error, acl, stat)
+ *
+ *
+ * @method getACL
+ * @param path {String} The znode path.
+ * @param callback {Function} The callback function.
+ */
+Client.prototype.getACL = function (path, callback) {
+    Path.validate(path);
+
+    if (typeof callback !== 'function') {
+        throw new Error('callback must be function.');
+    }
+
+    var self = this,
+        header = new jute.protocol.RequestHeader(),
+        payload = new jute.protocol.GetACLRequest(),
+        request;
+
+    header.type = jute.OP_CODES.GET_ACL;
+
+    payload.path = path;
+    request = new jute.Request(header, payload);
+
+    self.connectionManager.queue(request, function (error, response) {
+        if (error) {
+            callback(error);
+            return;
+        }
+
+        var acl;
+
+        if (Array.isArray(response.payload.acl)) {
+            acl = response.payload.acl.map(function (item) {
+                return ACL.fromRecord(item);
+            });
+        }
+
+        callback(null, acl, response.payload.stat);
     });
 };
 

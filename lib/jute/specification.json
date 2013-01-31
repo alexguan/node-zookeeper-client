@@ -94,6 +94,21 @@
             { "name" : "data", "type" : "buffer" },
             { "name" : "stat", "type" : "data.Stat" }
         ],
+        "GetACLRequest" : [
+            { "name" : "path", "type" : "ustring" }
+        ],
+        "GetACLResponse" : [
+            { "name" : "acl", "type" : "vector<data.ACL>" },
+            { "name" : "stat", "type" : "data.Stat" }
+        ],
+        "SetACLRequest" : [
+            { "name" : "path", "type" : "ustring" },
+            { "name" : "acl", "type" : "vector<data.ACL>" },
+            { "name" : "version", "type" : "int" }
+        ],
+        "SetACLResponse" : [
+            { "name" : "stat", "type" : "data.Stat" }
+        ],
         "WatcherEvent" : [
             { "name" : "type", "type" : "int" },
             { "name" : "state", "type" : "int" },
