@@ -14,8 +14,8 @@ var path = process.argv[3];
 function exists(client, path) {
     client.exists(
         path,
-        function (type, p) {
-            console.log('Got event: %s, path %s', type, p);
+        function (event) {
+            console.log('Got event: %s, path %s', event, event.path);
             exists(client, path);
         },
         function (error, stat) {

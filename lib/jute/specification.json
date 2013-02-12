@@ -113,6 +113,12 @@
             { "name" : "type", "type" : "int" },
             { "name" : "state", "type" : "int" },
             { "name" : "path", "type" : "ustring" }
+        ],
+        "SetWatches" : [
+            { "name" : "relativeZxid", "type" : "long" },
+            { "name" : "dataWatches", "type" : "vector<ustring>" },
+            { "name" : "existWatches", "type" : "vector<ustring>" },
+            { "name" : "childWatches", "type" : "vector<ustring>" }
         ]
     }
 }

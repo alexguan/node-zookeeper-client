@@ -41,71 +41,6 @@ function defaultStateListener(state) {
     //console.log('Current connection manager state is: %s', state);
 }
 
-
-function registerWatcher(self, path, type, watcher) {
-    self.watchers = self.watchers || {};
-    self.watchers[path] = self.watchers[path] || {};
-
-    switch (type) {
-    case Event.NODE_CREATED:
-        self.watchers[path].created =
-            self.watchers[path].created || new events.EventEmitter();
-        self.watchers[path].created.once('path', watcher);
-        break;
-    case Event.NODE_DELETED:
-        self.watchers[path].deleted =
-            self.watchers[path].deleted || new events.EventEmitter();
-        self.watchers[path].deleted.once('path', watcher);
-        break;
-    case Event.NODE_DATA_CHANGED:
-        self.watchers[path].dataChanged =
-            self.watchers[path].dataChanged || new events.EventEmitter();
-        self.watchers[path].dataChanged.once('path', watcher);
-        break;
-    case Event.NODE_CHILDREN_CHANGED:
-        self.watchers[path].childrenChanged =
-            self.watchers[path].childrenChanged || new events.EventEmitter();
-        self.watchers[path].childrenChanged.once('path', watcher);
-        break;
-    default:
-        throw new Error('Unknown event type: ' + type);
-    }
-}
-
-function emitWatcherEvent(self, watcherEvent) {
-    var watchers = self.watchers[watcherEvent.path],
-        event,
-        emitter;
-
-    if (!watchers) {
-        console.log(
-            'Weird, no registered watcher found for event: ' + watcherEvent
-        );
-        return;
-    }
-
-    event = Event.create(watcherEvent);
-
-    switch (event.type) {
-    case Event.NODE_CREATED:
-        emitter = watchers.created;
-        break;
-    case Event.NODE_DELETED:
-        emitter = watchers.deleted;
-        break;
-    case Event.NODE_DATA_CHANGED:
-        emitter = watchers.dataChanged;
-        break;
-    case Event.NODE_CHILDREN_CHANGED:
-        emitter = watchers.childrenChanged;
-        break;
-    default:
-        throw new Error('Unknown event type: ' + event.type);
-    }
-
-    emitter.emit('path', event);
-}
-
 /**
  * The zookeeper client constructor.
  *
@@ -134,11 +69,6 @@ function Client(connectionString, options, stateListener) {
         connectionString,
         options,
         this.onConnectionManagerState.bind(this)
-    );
-
-    this.connectionManager.on(
-        'notification',
-        this.onConnectionManagerNotification.bind(this)
     );
 
     this.options = options;
@@ -190,9 +120,6 @@ Client.prototype.onConnectionManagerState = function (connectionManagerState) {
     }
 };
 
-Client.prototype.onConnectionManagerNotification = function (notification) {
-    emitWatcherEvent(this, notification);
-};
 
 /**
  * Add the specified scheme:auth information to this client.
@@ -438,8 +365,7 @@ Client.prototype.getData = function (path, watcher, callback) {
         }
 
         if (watcher) {
-            registerWatcher(self, path, Event.NODE_DELETED, watcher);
-            registerWatcher(self, path, Event.NODE_DATA_CHANGED, watcher);
+            self.connectionManager.registerDataWatcher(path, watcher);
         }
 
         callback(null, response.payload.data, response.payload.stat);
@@ -596,21 +522,24 @@ Client.prototype.exists = function (path, watcher, callback) {
     request = new jute.Request(header, payload);
 
     self.connectionManager.queue(request, function (error, response) {
-        // FIXME, USE ERROR CONSTANTS
-        if (error && response.header.err !== -101) {
+        if (error && response.header.err !== Exception.NO_NODE) {
             callback(error);
             return;
         }
 
+        var existence = response.header.err === Exception.OK;
+
         if (watcher) {
-            registerWatcher(self, path, Event.NODE_CREATED, watcher);
-            registerWatcher(self, path, Event.NODE_DELETED, watcher);
-            registerWatcher(self, path, Event.NODE_DATA_CHANGED, watcher);
+            if (existence) {
+                self.connectionManager.registerDataWatcher(path, watcher);
+            } else {
+                self.connectionManager.registerExistenceWatcher(path, watcher);
+            }
         }
 
         callback(
             null,
-            response.header.err === -101 ? null : response.payload.stat
+            existence ? response.payload.stat : null
         );
     });
 };
@@ -665,8 +594,7 @@ Client.prototype.getChildren = function (path, watcher, callback) {
         }
 
         if (watcher) {
-            registerWatcher(self, path, Event.NODE_CHILDREN_CHANGED, watcher);
-            registerWatcher(self, path, Event.NODE_DELETED, watcher);
+            self.connectionManager.registerChildWatcher(path, watcher);
         }
 
         callback(null, response.payload.children, response.payload.stat);
