@@ -9,15 +9,23 @@ var client = zookeeper.createClient(
 );
 
 var path = process.argv[3];
+var watcherRegistered = false;
 
 
 function listChildren(client, path) {
+    var watcher = null;
+
+    if (!watcherRegistered) {
+        watcher = function (event) {
+            console.log('Got event: %s', event);
+            watcherRegistered = false;
+            listChildren(client, path);
+        };
+    }
+
     client.getChildren(
         path,
-        function (event) {
-            console.log('Got event: %s', event);
-            listChildren(client, path);
-        },
+        watcher,
         function (error, children, stat) {
             if (error) {
                 console.log('Got error when listing children:');
@@ -25,6 +33,7 @@ function listChildren(client, path) {
                 return;
             }
 
+            watcherRegistered = true;
             console.log('Children of %s: %j', path, children);
         }
     );
