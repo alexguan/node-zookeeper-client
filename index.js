@@ -414,7 +414,7 @@ Client.prototype.setACL = function (path, acl, version, callback) {
     payload.acl = acl.map(function (item) {
         return item.toRecord();
     });
-    console.dir(payload.acl);
+    //console.dir(payload.acl);
     payload.version = version;
 
     request = new jute.Request(header, payload);
