@@ -522,7 +522,7 @@ Client.prototype.exists = function (path, watcher, callback) {
     request = new jute.Request(header, payload);
 
     self.connectionManager.queue(request, function (error, response) {
-        if (error && response.header.err !== Exception.NO_NODE) {
+        if (error && error.code !== Exception.NO_NODE) {
             callback(error);
             return;
         }
