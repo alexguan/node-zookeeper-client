@@ -123,7 +123,7 @@ Client.prototype.onConnectionManagerState = function (connectionManagerState) {
 /**
  * Returns the state of the client.
  *
- * @method getStae
+ * @method getState
  * @return {State} the state of the client.
  */
 Client.prototype.getState = function () {
