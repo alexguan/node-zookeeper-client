@@ -120,6 +120,52 @@ Client.prototype.onConnectionManagerState = function (connectionManagerState) {
     }
 };
 
+/**
+ * Returns the state of the client.
+ *
+ * @method getStae
+ * @return {State} the state of the client.
+ */
+Client.prototype.getState = function () {
+    return this.state;
+};
+
+/**
+ * Returns the session id for this client instance. The value returned is not
+ * valid until the client connects to a server and may change after a
+ * re-connect.
+ *
+ * @method getSessionId
+ * @return {Buffer} the session id, 8 bytes long buffer.
+ */
+Client.prototype.getSessionId = function () {
+    return this.ConnectionManager.getSessionId();
+};
+
+/**
+ * Returns the session password for this client instance. The value returned
+ * is not valid until the client connects to a server and may change after a
+ * re-connect.
+ *
+ * @method getSessionPassword
+ * @return {Buffer} the session password, 16 bytes buffer.
+ */
+Client.prototype.getSessionId = function () {
+    return this.ConnectionManager.getSessionPassword();
+};
+
+/**
+ * Returns the negotiated session timeout for this client instance. The value
+ * returned is not valid until the client connects to a server and may change
+ * after a re-connect.
+ *
+ * @method getSessionTimeout
+ * @return {Integer} the session timeout value.
+ */
+Client.prototype.getSessionTimeout = function () {
+    return this.ConnectionManager.getSessionTimeout();
+};
+
 
 /**
  * Add the specified scheme:auth information to this client.
