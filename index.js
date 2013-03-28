@@ -15,6 +15,7 @@ var util = require('util');
 var net = require('net');
 
 var u = require('underscore');
+var async = require('async');
 
 var jute = require('./lib/jute');
 var ACL = require('./lib/ACL.js');
@@ -195,8 +196,6 @@ Client.prototype.addAuthInfo = function (scheme, auth) {
  * callback prototype:
  * callback(error)
  *
- * watcher prototype:
- *
  * @method create
  * @param path {String} The znode path.
  * @param acls {Array} The array of ACL object.
@@ -211,6 +210,10 @@ Client.prototype.create = function (path, acl, mode, data, callback) {
     }
 
     Path.validate(path);
+
+    if (typeof callback !== 'function') {
+        throw new Error('callback must be a function.');
+    }
 
     if (!Array.isArray(acl) || acl.length < 1) {
         throw new Error('acls must be a non-empty array.');
@@ -272,6 +275,10 @@ Client.prototype.remove = function (path, version, callback) {
 
     Path.validate(path);
 
+    if (typeof callback !== 'function') {
+        throw new Error('callback must be a function.');
+    }
+
     if (typeof version !== 'number') {
         throw new Error('version must be a number.');
     }
@@ -325,6 +332,10 @@ Client.prototype.setData = function (path, data, version, callback) {
     }
 
     Path.validate(path);
+
+    if (typeof callback !== 'function') {
+        throw new Error('callback must be a function.');
+    }
 
     if (Buffer.isBuffer(data) && data.length > DATA_SIZE_LIMIT) {
         throw new Error(
@@ -389,7 +400,7 @@ Client.prototype.getData = function (path, watcher, callback) {
     Path.validate(path);
 
     if (typeof callback !== 'function') {
-        throw new Error('callback must be function.');
+        throw new Error('callback must be a function.');
     }
 
     var self = this,
@@ -442,6 +453,10 @@ Client.prototype.setACL = function (path, acl, version, callback) {
 
     Path.validate(path);
 
+    if (typeof callback !== 'function') {
+        throw new Error('callback must be a function.');
+    }
+
     if (!Array.isArray(acl) || acl.length < 1) {
         throw new Error('acl must be a non-empty array.');
     }
@@ -491,7 +506,7 @@ Client.prototype.getACL = function (path, callback) {
     Path.validate(path);
 
     if (typeof callback !== 'function') {
-        throw new Error('callback must be function.');
+        throw new Error('callback must be a function.');
     }
 
     var self = this,
@@ -551,7 +566,7 @@ Client.prototype.exists = function (path, watcher, callback) {
     Path.validate(path);
 
     if (typeof callback !== 'function') {
-        throw new Error('callback must be function.');
+        throw new Error('callback must be a function.');
     }
 
 
@@ -617,7 +632,7 @@ Client.prototype.getChildren = function (path, watcher, callback) {
     Path.validate(path);
 
     if (typeof callback !== 'function') {
-        throw new Error('callback must be function.');
+        throw new Error('callback must be a function.');
     }
 
 
@@ -644,6 +659,74 @@ Client.prototype.getChildren = function (path, watcher, callback) {
         }
 
         callback(null, response.payload.children, response.payload.stat);
+    });
+};
+
+/**
+ * Make sure all nodes in the path are created.
+ *
+ * callback prototype:
+ * callback(error, path)
+ *
+ * @method mkdirp
+ * @param path {String} The znode path.
+ * @param [acls=ACL.OPEN_ACL_UNSAFE] {Array} The array of ACL object.
+ * @param [mode=CreateMode.PERSISTENT] {CreateMode} The creation mode.
+ * @param [data=undefined] {Buffer} The data buffer.
+ * @param callback {Function} The callback function.
+ */
+Client.prototype.mkdirp = function (path, acl, mode, data, callback) {
+    callback = arguments[arguments.length - 1];
+
+    Path.validate(path);
+
+    if (typeof callback !== 'function') {
+        throw new Error('callback must be a function.');
+    }
+
+    var self = this,
+        nodes = path.split('/').slice(1), // Remove the empty string
+        currentPath = '',
+        i;
+
+    for (i = 1; i < arguments.length - 1; i += 1) {
+        if (Array.isArray(arguments[i])) {
+            acl = arguments[i];
+        } else if (typeof arguments[i] === 'number') {
+            mode = arguments[i];
+        } else if (Buffer.isBuffer(data)) {
+            data = arguments[i];
+        } else {
+            throw new Error('Unexpected argument: ' + arguments[i]);
+        }
+    }
+
+    acl = acl || ACL.OPEN_ACL_UNSAFE;
+    mode = typeof mode === 'number' ? mode : CreateMode.PERSISTENT;
+
+    if (acl.length < 1) {
+        throw new Error('acls must be a non-empty array.');
+    }
+
+    if (Buffer.isBuffer(data) && data.length > DATA_SIZE_LIMIT) {
+        throw new Error(
+            'data must be equal of smaller than ' + DATA_SIZE_LIMIT + ' bytes.'
+        );
+    }
+
+    async.eachSeries(nodes, function (node, next) {
+        currentPath = currentPath + '/' + node;
+        self.create(currentPath, acl, mode, data, function (error, path) {
+            // Skip node exist error.
+            if (error && error.code === Exception.NODE_EXISTS) {
+                next(null);
+                return;
+            }
+
+            next(error);
+        });
+    }, function (error) {
+        callback(error, currentPath);
     });
 };
 

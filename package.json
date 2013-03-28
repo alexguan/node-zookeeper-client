@@ -18,6 +18,7 @@
   "dependencies": {
     "underscore": "~1.4.3",
     "jsonutil": "~0.2.0",
-    "bunyan": "~0.18.2"
+    "bunyan": "~0.18.2",
+    "async": "~0.2.6"
   }
 }
