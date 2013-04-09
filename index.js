@@ -140,7 +140,7 @@ Client.prototype.getState = function () {
  * @return {Buffer} the session id, 8 bytes long buffer.
  */
 Client.prototype.getSessionId = function () {
-    return this.ConnectionManager.getSessionId();
+    return this.connectionManager.getSessionId();
 };
 
 /**
@@ -151,8 +151,8 @@ Client.prototype.getSessionId = function () {
  * @method getSessionPassword
  * @return {Buffer} the session password, 16 bytes buffer.
  */
-Client.prototype.getSessionId = function () {
-    return this.ConnectionManager.getSessionPassword();
+Client.prototype.getSessionPassword = function () {
+    return this.connectionManager.getSessionPassword();
 };
 
 /**
@@ -164,7 +164,7 @@ Client.prototype.getSessionId = function () {
  * @return {Integer} the session timeout value.
  */
 Client.prototype.getSessionTimeout = function () {
-    return this.ConnectionManager.getSessionTimeout();
+    return this.connectionManager.getSessionTimeout();
 };
 
 
