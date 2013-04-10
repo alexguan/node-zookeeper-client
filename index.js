@@ -203,7 +203,7 @@ Client.prototype.addAuthInfo = function (scheme, auth) {
  * @param data {Buffer} The data buffer, optional
  * @param callback {Function} The callback function.
  */
-Client.prototype.create = function (path, acl, mode, data, callback) {
+Client.prototype.create = function (path, acls, mode, data, callback) {
     if (!callback) {
         callback = data;
         data = undefined;
@@ -215,7 +215,7 @@ Client.prototype.create = function (path, acl, mode, data, callback) {
         throw new Error('callback must be a function.');
     }
 
-    if (!Array.isArray(acl) || acl.length < 1) {
+    if (!Array.isArray(acls) || acls.length < 1) {
         throw new Error('acls must be a non-empty array.');
     }
 
@@ -237,7 +237,7 @@ Client.prototype.create = function (path, acl, mode, data, callback) {
     header.type = jute.OP_CODES.CREATE;
 
     payload.path = path;
-    payload.acl = acl.map(function (item) {
+    payload.acl = acls.map(function (item) {
         return item.toRecord();
     });
     payload.flags = mode;
@@ -445,7 +445,7 @@ Client.prototype.getData = function (path, watcher, callback) {
  * @param version {Number} The version of the znode, optional, defaults to -1.
  * @param callback {Function} The callback function.
  */
-Client.prototype.setACL = function (path, acl, version, callback) {
+Client.prototype.setACL = function (path, acls, version, callback) {
     if (!callback) {
         callback = version;
         version = -1;
@@ -457,7 +457,7 @@ Client.prototype.setACL = function (path, acl, version, callback) {
         throw new Error('callback must be a function.');
     }
 
-    if (!Array.isArray(acl) || acl.length < 1) {
+    if (!Array.isArray(acls) || acls.length < 1) {
         throw new Error('acl must be a non-empty array.');
     }
 
@@ -472,7 +472,7 @@ Client.prototype.setACL = function (path, acl, version, callback) {
     header.type = jute.OP_CODES.SET_ACL;
 
     payload.path = path;
-    payload.acl = acl.map(function (item) {
+    payload.acl = acls.map(function (item) {
         return item.toRecord();
     });
     //console.dir(payload.acl);
@@ -675,8 +675,15 @@ Client.prototype.getChildren = function (path, watcher, callback) {
  * @param [data=undefined] {Buffer} The data buffer.
  * @param callback {Function} The callback function.
  */
-Client.prototype.mkdirp = function (path, acl, mode, data, callback) {
+Client.prototype.mkdirp = function (path, acls, mode, data, callback) {
+    if (arguments.length < 2) {
+        throw new Error(
+            'mkdirp need at least the path and callback arguments.'
+        );
+    }
+
     callback = arguments[arguments.length - 1];
+    acls = mode = data = undefined;
 
     Path.validate(path);
 
@@ -691,7 +698,7 @@ Client.prototype.mkdirp = function (path, acl, mode, data, callback) {
 
     for (i = 1; i < arguments.length - 1; i += 1) {
         if (Array.isArray(arguments[i])) {
-            acl = arguments[i];
+            acls = arguments[i];
         } else if (typeof arguments[i] === 'number') {
             mode = arguments[i];
         } else if (Buffer.isBuffer(data)) {
@@ -701,10 +708,11 @@ Client.prototype.mkdirp = function (path, acl, mode, data, callback) {
         }
     }
 
-    acl = acl || ACL.OPEN_ACL_UNSAFE;
+
+    acls = acls || ACL.OPEN_ACL_UNSAFE;
     mode = typeof mode === 'number' ? mode : CreateMode.PERSISTENT;
 
-    if (acl.length < 1) {
+    if (acls.length < 1) {
         throw new Error('acls must be a non-empty array.');
     }
 
@@ -716,7 +724,7 @@ Client.prototype.mkdirp = function (path, acl, mode, data, callback) {
 
     async.eachSeries(nodes, function (node, next) {
         currentPath = currentPath + '/' + node;
-        self.create(currentPath, acl, mode, data, function (error, path) {
+        self.create(currentPath, acls, mode, data, function (error, path) {
             // Skip node exist error.
             if (error && error.code === Exception.NODE_EXISTS) {
                 next(null);
