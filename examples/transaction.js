@@ -30,12 +30,15 @@ client.on('state', function (state) {
                         'Failed to execute the transaction: %s.',
                         error.stack
                     );
+
+                    if (results) {
+                        console.log('Transaction results: %j.', results);
+                    }
+
+                    return;
                 }
 
-                if (results) {
-                    console.log('Transaction results: %j.', results);
-                }
-
+                console.log('Transaction completed.');
                 client.close();
             });
     }
