@@ -119,6 +119,18 @@
             { "name" : "dataWatches", "type" : "vector<ustring>" },
             { "name" : "existWatches", "type" : "vector<ustring>" },
             { "name" : "childWatches", "type" : "vector<ustring>" }
+        ],
+        "MultiHeader" : [
+            { "name" : "type", "type" : "int" },
+            { "name" : "done", "type" : "boolean" },
+            { "name" : "err", "type" : "int" }
+        ],
+        "CheckVersionRequest" : [
+            { "name" : "path", "type" : "ustring" },
+            { "name" : "version", "type" : "int" }
+        ],
+        "ErrorResponse" : [
+            { "name" : "err", "type" : "int" }
         ]
     }
 }

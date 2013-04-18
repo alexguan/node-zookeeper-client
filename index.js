@@ -26,6 +26,7 @@ var State = require('./lib/State.js');
 var Permission = require('./lib/Permission.js');
 var CreateMode = require('./lib/CreateMode.js');
 var Exception = require('./lib/Exception');
+var Transaction = require('./lib/Transaction.js');
 var ConnectionManager = require('./lib/ConnectionManager.js');
 
 
@@ -241,7 +242,11 @@ Client.prototype.create = function (path, acls, mode, data, callback) {
         return item.toRecord();
     });
     payload.flags = mode;
-    payload.data = data;
+
+    if (Buffer.isBuffer(data)) {
+        payload.data = new Buffer(data.length);
+        data.copy(payload.data);
+    }
 
     request = new jute.Request(header, payload);
 
@@ -676,6 +681,7 @@ Client.prototype.getChildren = function (path, watcher, callback) {
  * @param callback {Function} The callback function.
  */
 Client.prototype.mkdirp = function (path, acls, mode, data, callback) {
+    // TODO: data as the second parameter
     if (arguments.length < 2) {
         throw new Error(
             'mkdirp need at least the path and callback arguments.'
@@ -736,6 +742,16 @@ Client.prototype.mkdirp = function (path, acls, mode, data, callback) {
     }, function (error) {
         callback(error, currentPath);
     });
+};
+
+/**
+ * Create and return a new Transaction instance.
+ *
+ * @method transaction
+ * @return {Transaction} an instance of Transaction.
+ */
+Client.prototype.transaction = function () {
+    return new Transaction(this.connectionManager);
 };
 
 /**
