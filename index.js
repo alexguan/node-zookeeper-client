@@ -38,9 +38,29 @@ var CLIENT_DEFAULT_OPTIONS = {
 
 var DATA_SIZE_LIMIT = 1048576; // 1 mega bytes.
 
-
+/**
+ * Default state linstener to emit user-friendly events.
+ */
 function defaultStateListener(state) {
-    //console.log('Current connection manager state is: %s', state);
+    switch (state) {
+    case State.DISCONNECTED:
+        this.emit('disconnected');
+        break;
+    case State.SYNC_CONNECTED:
+        this.emit('connected');
+        break;
+    case State.CONNECTED_READ_ONLY:
+        this.emit('connectedReadOnly');
+        break;
+    case State.EXPIRED:
+        this.emit('expired');
+        break;
+    case State.AUTH_FAILED:
+        this.emit('authenticationFailed');
+        break;
+    default:
+        return;
+    }
 }
 
 /**
@@ -50,10 +70,11 @@ function defaultStateListener(state) {
  * @constructor
  * @param connectionString {String} ZooKeeper server ensemble string.
  * @param options {Object} Client options.
- * @param stateListener {Object} Listener for state changes.
  */
-function Client(connectionString, options, stateListener) {
+function Client(connectionString, options) {
     events.EventEmitter.call(this);
+
+    options = options || {};
 
     if (!connectionString || typeof connectionString !== 'string') {
         throw new Error('connectionString must be an non-empty string.');
@@ -63,9 +84,7 @@ function Client(connectionString, options, stateListener) {
         throw new Error('options must be a valid object');
     }
 
-    if (typeof stateListener !== 'function') {
-        throw new Error('stateListener must be a valid function.');
-    }
+    options = u.defaults(u.clone(options), CLIENT_DEFAULT_OPTIONS);
 
     this.connectionManager = new ConnectionManager(
         connectionString,
@@ -76,8 +95,7 @@ function Client(connectionString, options, stateListener) {
     this.options = options;
     this.state = State.DISCONNECTED;
 
-    // TODO: Need to make sure we only have one listener for state.
-    this.on('state', stateListener);
+    this.on('state', defaultStateListener);
 }
 
 util.inherits(Client, events.EventEmitter);
@@ -756,29 +774,10 @@ Client.prototype.transaction = function () {
 
 /**
  * Create a new ZooKeeper client.
- *
- * @for node-zookeeper-client
- * @method createClient
- * @param connectionString {String} ZooKeeper server ensemble string.
- * @param options {Object} Client options, optional.
- * @param stateListener {Object} Listener for state changes, optional.
- * @return {Client} ZooKeeper client object.
  */
-function createClient(connectionString, options, stateListener) {
-    if (typeof stateListener === 'undefined' && typeof options === 'function') {
-        stateListener = options;
-        options = undefined;
-    }
-
-    stateListener = stateListener || defaultStateListener;
-    options = options || {};
-
-    options = u.defaults(u.clone(options), CLIENT_DEFAULT_OPTIONS);
-
-    return new Client(connectionString, options, stateListener);
+function createClient(connectionString, options) {
+    return new Client(connectionString, options);
 }
-
-
 
 exports.createClient = createClient;
 exports.ACL = ACL;

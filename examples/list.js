@@ -10,17 +10,6 @@ var client = zookeeper.createClient(
 
 var path = process.argv[3];
 
-function once(fn) {
-    var invoked = false;
-
-    return function () {
-        if (!invoked) {
-            invoked = true;
-            return fn.apply(this, arguments);
-        }
-    };
-}
-
 function listChildren(client, path) {
     client.getChildren(
         path,
@@ -40,18 +29,9 @@ function listChildren(client, path) {
     );
 }
 
-var list = once(listChildren);
-
-client.on('state', function (state) {
-    console.log('Client state changed to: ' + state);
-    if (state === zookeeper.State.SYNC_CONNECTED) {
-        console.log('Connected to the server.');
-        list(client, path);
-    }
-});
-
-client.on('error', function (error) {
-    console.log('Got error: ' + error);
+client.once('connected', function () {
+    console.log('Connected to ZooKeeper.');
+    listChildren(client, path);
 });
 
 client.connect();
