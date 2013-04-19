@@ -16,9 +16,7 @@
   "author": "Alex Guan",
   "license": "BSD",
   "dependencies": {
-    "underscore": "~1.4.3",
-    "jsonutil": "~0.2.0",
-    "bunyan": "~0.18.2",
-    "async": "~0.2.6"
+    "underscore": "~1.4.4",
+    "async": "~0.2.7"
   }
 }
