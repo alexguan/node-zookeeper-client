@@ -73,6 +73,10 @@ function defaultStateListener(state) {
  * @param [options] {Object} client options.
  */
 function Client(connectionString, options) {
+    if (!(this instanceof Client)) {
+        return new Client(connectionString, options);
+    }
+
     events.EventEmitter.call(this);
 
     options = options || {};
@@ -273,6 +277,10 @@ Client.prototype.create = function (path, data, acls, mode, callback) {
 
     assert(acls.length > 0, 'acls must be a non-empty array.');
 
+    assert(
+        data === null || data === undefined || Buffer.isBuffer(data),
+        'data must be a valid buffer, null or undefined.'
+    );
     if (Buffer.isBuffer(data)) {
         assert(
             data.length <= DATA_SIZE_LIMIT,
@@ -373,13 +381,16 @@ Client.prototype.setData = function (path, data, version, callback) {
     assert(typeof callback === 'function', 'callback must be a function.');
     assert(typeof version === 'number', 'version must be a number.');
 
+    assert(
+        data === null || data === undefined || Buffer.isBuffer(data),
+        'data must be a valid buffer, null or undefined.'
+    );
     if (Buffer.isBuffer(data)) {
         assert(
             data.length <= DATA_SIZE_LIMIT,
             'data must be equal of smaller than ' + DATA_SIZE_LIMIT + ' bytes.'
         );
     }
-
 
     var header = new jute.protocol.RequestHeader(),
         payload = new jute.protocol.SetDataRequest(),
@@ -701,6 +712,10 @@ Client.prototype.mkdirp = function (path, data, acls, mode, callback) {
 
     assert(acls.length > 0, 'acls must be a non-empty array.');
 
+    assert(
+        data === null || data === undefined || Buffer.isBuffer(data),
+        'data must be a valid buffer, null or undefined.'
+    );
     if (Buffer.isBuffer(data)) {
         assert(
             data.length <= DATA_SIZE_LIMIT,
