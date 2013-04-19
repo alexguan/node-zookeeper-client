@@ -502,7 +502,7 @@ Client.prototype.setACL = function (path, acls, version, callback) {
     payload.acl = acls.map(function (item) {
         return item.toRecord();
     });
-    //console.dir(payload.acl);
+
     payload.version = version;
 
     request = new jute.Request(header, payload);
@@ -694,8 +694,6 @@ Client.prototype.mkdirp = function (path, data, acls, mode, callback) {
         if (i === 0 || i === (args.length - 1)) {
             return;
         }
-
-        console.log(arg, i, args);
 
         if (Array.isArray(arg)) {
             acls = arg;
