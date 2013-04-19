@@ -10,23 +10,24 @@
  *
  */
 
-var events = require('events');
-var util = require('util');
-var net = require('net');
+var assert            = require('assert');
+var events            = require('events');
+var util              = require('util');
+var net               = require('net');
 
-var u = require('underscore');
-var async = require('async');
+var async             = require('async');
+var u                 = require('underscore');
 
-var jute = require('./lib/jute');
-var ACL = require('./lib/ACL.js');
-var Id = require('./lib/Id.js');
-var Path = require('./lib/Path.js');
-var Event = require('./lib/Event.js');
-var State = require('./lib/State.js');
-var Permission = require('./lib/Permission.js');
-var CreateMode = require('./lib/CreateMode.js');
-var Exception = require('./lib/Exception');
-var Transaction = require('./lib/Transaction.js');
+var jute              = require('./lib/jute');
+var ACL               = require('./lib/ACL.js');
+var Id                = require('./lib/Id.js');
+var Path              = require('./lib/Path.js');
+var Event             = require('./lib/Event.js');
+var State             = require('./lib/State.js');
+var Permission        = require('./lib/Permission.js');
+var CreateMode        = require('./lib/CreateMode.js');
+var Exception         = require('./lib/Exception');
+var Transaction       = require('./lib/Transaction.js');
 var ConnectionManager = require('./lib/ConnectionManager.js');
 
 
@@ -39,7 +40,7 @@ var CLIENT_DEFAULT_OPTIONS = {
 var DATA_SIZE_LIMIT = 1048576; // 1 mega bytes.
 
 /**
- * Default state linstener to emit user-friendly events.
+ * Default state listener to emit user-friendly events.
  */
 function defaultStateListener(state) {
     switch (state) {
@@ -64,25 +65,27 @@ function defaultStateListener(state) {
 }
 
 /**
- * The zookeeper client constructor.
+ * The ZooKeeper client constructor.
  *
  * @class Client
  * @constructor
  * @param connectionString {String} ZooKeeper server ensemble string.
- * @param options {Object} Client options.
+ * @param [options] {Object} client options.
  */
 function Client(connectionString, options) {
     events.EventEmitter.call(this);
 
     options = options || {};
 
-    if (!connectionString || typeof connectionString !== 'string') {
-        throw new Error('connectionString must be an non-empty string.');
-    }
+    assert(
+        connectionString && typeof connectionString === 'string',
+        'connectionString must be an non-empty string.'
+    );
 
-    if (typeof options !== 'object') {
-        throw new Error('options must be a valid object');
-    }
+    assert(
+        typeof options === 'object',
+        'options must be a valid object'
+    );
 
     options = u.defaults(u.clone(options), CLIENT_DEFAULT_OPTIONS);
 
@@ -100,15 +103,27 @@ function Client(connectionString, options) {
 
 util.inherits(Client, events.EventEmitter);
 
-// We properly should not have this one
+/**
+ * Start the client and try to connect to the ensemble.
+ *
+ * @method connect
+ */
 Client.prototype.connect = function () {
     this.connectionManager.connect();
 };
 
+/**
+ * Shutdown the client.
+ *
+ * @method connect
+ */
 Client.prototype.close = function () {
     this.connectionManager.close();
 };
 
+/**
+ * Private method to translate connection manager state into client state.
+ */
 Client.prototype.onConnectionManagerState = function (connectionManagerState) {
     var state;
 
@@ -195,59 +210,75 @@ Client.prototype.getSessionTimeout = function () {
  * @param auth {Buffer} The authentication data buffer.
  */
 Client.prototype.addAuthInfo = function (scheme, auth) {
-    if (!scheme || typeof scheme !== 'string') {
-        throw new Error('scheme must be a non-empty string.');
-    }
+    assert(
+        scheme || typeof scheme === 'string',
+        'scheme must be a non-empty string.'
+    );
 
-    if (!Buffer.isBuffer(auth)) {
-        throw new Error('auth must be a valid instance of Buffer');
-    }
+    assert(
+        Buffer.isBuffer(auth),
+        'auth must be a valid instance of Buffer'
+    );
 
     var buffer = new Buffer(auth.length);
-    auth.copy(buffer);
 
+    auth.copy(buffer);
     this.connectionManager.addAuthInfo(scheme, buffer);
 };
 
 /**
- * Create a znode with the given path, data and ACL.
- *
- * callback prototype:
- * callback(error)
+ * Create a znode with given path, data, acls and mode.
  *
  * @method create
  * @param path {String} The znode path.
- * @param acls {Array} The array of ACL object.
- * @param mode {CreateMode} The creation mode.
- * @param data {Buffer} The data buffer, optional
+ * @param [data=undefined] {Buffer} The data buffer.
+ * @param [acls=ACL.OPEN_ACL_UNSAFE] {Array} An array of ACL object.
+ * @param [mode=CreateMode.PERSISTENT] {CreateMode} The creation mode.
  * @param callback {Function} The callback function.
  */
-Client.prototype.create = function (path, acls, mode, data, callback) {
-    if (!callback) {
-        callback = data;
-        data = undefined;
-    }
+Client.prototype.create = function (path, data, acls, mode, callback) {
+    assert(
+        arguments.length >= 2 && arguments.length <= 5,
+        'create needs at least the path and callback arguments.'
+    );
 
     Path.validate(path);
+    callback = arguments[arguments.length - 1];
 
-    if (typeof callback !== 'function') {
-        throw new Error('callback must be a function.');
-    }
+    assert(
+        typeof callback === 'function',
+        'callback must be a function.'
+    );
 
-    if (!Array.isArray(acls) || acls.length < 1) {
-        throw new Error('acls must be a non-empty array.');
-    }
+    acls = mode = data = undefined;
 
-    if (typeof mode !== 'number') {
-        throw new Error('mode must be a valid integer.');
-    }
+    Array.prototype.slice.call(arguments).forEach(function (arg, i, args) {
+        // Skip the first and the last arguments
+        if (i === 0 || i === args.length - 1) {
+            return;
+        }
 
-    if (Buffer.isBuffer(data) && data.length > DATA_SIZE_LIMIT) {
-        throw new Error(
+        if (Array.isArray(arg)) {
+            acls = arg;
+        } else if (typeof arg === 'number') {
+            mode = arg;
+        } else if (Buffer.isBuffer(arg)) {
+            data = arg;
+        }
+    });
+
+
+    acls = acls || ACL.OPEN_ACL_UNSAFE;
+    mode = typeof mode === 'number' ? mode : CreateMode.PERSISTENT;
+
+    assert(acls.length > 0, 'acls must be a non-empty array.');
+
+    if (Buffer.isBuffer(data)) {
+        assert(
+            data.length <= DATA_SIZE_LIMIT,
             'data must be equal of smaller than ' + DATA_SIZE_LIMIT + ' bytes.'
         );
     }
-
 
     var header = new jute.protocol.RequestHeader(),
         payload = new jute.protocol.CreateRequest(),
@@ -282,12 +313,9 @@ Client.prototype.create = function (path, acls, mode, data, callback) {
  * Delete a znode with the given path. If version is not -1, the request will
  * fail when the provided version does not match the server version.
  *
- * callback prototype:
- * callback(error)
- *
  * @method delete
  * @param path {String} The znode path.
- * @param version {Number} The version of the znode, optional, defaults to -1.
+ * @param [version=-1] {Number} The version of the znode.
  * @param callback {Function} The callback function.
  */
 Client.prototype.remove = function (path, version, callback) {
@@ -298,13 +326,8 @@ Client.prototype.remove = function (path, version, callback) {
 
     Path.validate(path);
 
-    if (typeof callback !== 'function') {
-        throw new Error('callback must be a function.');
-    }
-
-    if (typeof version !== 'number') {
-        throw new Error('version must be a number.');
-    }
+    assert(typeof callback === 'function', 'callback must be a function.');
+    assert(typeof version === 'number', 'version must be a number.');
 
 
     var header = new jute.protocol.RequestHeader(),
@@ -330,22 +353,13 @@ Client.prototype.remove = function (path, version, callback) {
 
 /**
  * Set the data for the znode of the given path if such a node exists and the
- * given version matches the version of the node (if the given version is -1,
- * it matches any node's versions).
- *
- * The callback Return the stat of the node. This operation, if successful,
- * will trigger all the watches on the node of the given path left by getData
- * calls.
- *
- * The maximum allowable size of the data array is 1 MB (1,048,576 bytes).
- *
- * callback prototype:
- * callback(error, stat)
+ * optional given version matches the version of the znode (if the given
+ * version is -1, it matches any node's versions).
  *
  * @method setData
  * @param path {String} The znode path.
  * @param data {Buffer} The data buffer.
- * @param version {Number} The version of the znode, optional, defaults to -1.
+ * @param [version=-1] {Number} The version of the znode.
  * @param callback {Function} The callback function.
  */
 Client.prototype.setData = function (path, data, version, callback) {
@@ -356,19 +370,16 @@ Client.prototype.setData = function (path, data, version, callback) {
 
     Path.validate(path);
 
-    if (typeof callback !== 'function') {
-        throw new Error('callback must be a function.');
-    }
+    assert(typeof callback === 'function', 'callback must be a function.');
+    assert(typeof version === 'number', 'version must be a number.');
 
-    if (Buffer.isBuffer(data) && data.length > DATA_SIZE_LIMIT) {
-        throw new Error(
+    if (Buffer.isBuffer(data)) {
+        assert(
+            data.length <= DATA_SIZE_LIMIT,
             'data must be equal of smaller than ' + DATA_SIZE_LIMIT + ' bytes.'
         );
     }
 
-    if (typeof version !== 'number') {
-        throw new Error('version must be a valid number.');
-    }
 
     var header = new jute.protocol.RequestHeader(),
         payload = new jute.protocol.SetDataRequest(),
@@ -395,23 +406,17 @@ Client.prototype.setData = function (path, data, version, callback) {
 
 /**
  *
- * Return the data and the stat of the znode of the given path.
+ * Retrieve the data and the stat of the znode of the given path.
  *
- * If the watcher is provided and the call is successful (no error), the watcher
+ * If the watcher is provided and the call is successful (no error), a watcher
  * will be left on the znode with the given path.
  *
  * The watch will be triggered by a successful operation that sets data on
  * the node, or deletes the node.
  *
- * callback prototype:
- * callback(error, data, stat)
- *
- * watcher prototype:
- * watcher(type, path);
- *
  * @method getData
  * @param path {String} The znode path.
- * @param watcher {Function} The watcher function, optional.
+ * @param [watcher] {Function} The watcher function.
  * @param callback {Function} The callback function.
  */
 Client.prototype.getData = function (path, watcher, callback) {
@@ -422,9 +427,7 @@ Client.prototype.getData = function (path, watcher, callback) {
 
     Path.validate(path);
 
-    if (typeof callback !== 'function') {
-        throw new Error('callback must be a function.');
-    }
+    assert(typeof callback === 'function', 'callback must be a function.');
 
     var self = this,
         header = new jute.protocol.RequestHeader(),
@@ -457,15 +460,11 @@ Client.prototype.getData = function (path, watcher, callback) {
  * given version matches the version of the node (if the given version is -1,
  * it matches any node's versions).
  *
- * The callback returns the stat of the node. This operation.
- *
- * callback prototype:
- * callback(error, stat)
  *
  * @method setACL
  * @param path {String} The znode path.
  * @param acls {Array} The array of ACL objects.
- * @param version {Number} The version of the znode, optional, defaults to -1.
+ * @param [version] {Number} The version of the znode.
  * @param callback {Function} The callback function.
  */
 Client.prototype.setACL = function (path, acls, version, callback) {
@@ -475,18 +474,12 @@ Client.prototype.setACL = function (path, acls, version, callback) {
     }
 
     Path.validate(path);
-
-    if (typeof callback !== 'function') {
-        throw new Error('callback must be a function.');
-    }
-
-    if (!Array.isArray(acls) || acls.length < 1) {
-        throw new Error('acl must be a non-empty array.');
-    }
-
-    if (typeof version !== 'number') {
-        throw new Error('version must be a valid number.');
-    }
+    assert(typeof callback === 'function', 'callback must be a function.');
+    assert(
+        Array.isArray(acls) && acls.length > 0,
+        'acls must be a non-empty array.'
+    );
+    assert(typeof version === 'number', 'version must be a number.');
 
     var header = new jute.protocol.RequestHeader(),
         payload = new jute.protocol.SetACLRequest(),
@@ -514,12 +507,7 @@ Client.prototype.setACL = function (path, acls, version, callback) {
 };
 
 /**
- *
- * Return the ACL and the stat of the znode of the given path.
- *
- * callback prototype:
- * callback(error, acl, stat)
- *
+ * Retrieve the ACL and the stat of the znode of the given path.
  *
  * @method getACL
  * @param path {String} The znode path.
@@ -527,10 +515,7 @@ Client.prototype.setACL = function (path, acls, version, callback) {
  */
 Client.prototype.getACL = function (path, callback) {
     Path.validate(path);
-
-    if (typeof callback !== 'function') {
-        throw new Error('callback must be a function.');
-    }
+    assert(typeof callback === 'function', 'callback must be a function.');
 
     var self = this,
         header = new jute.protocol.RequestHeader(),
@@ -569,15 +554,9 @@ Client.prototype.getACL = function (path, callback) {
  * The watcher will be triggered by a successful operation that creates/delete
  * the node or sets the data on the node.
  *
- * watcher prototype:
- * watcher(type, path)
- *
- * callback prototype:
- * callback(error, Stat)
- *
  * @method exists
  * @param path {String} The znode path.
- * @param watcher {Function} The watcher function, optional.
+ * @param [watcher] {Function} The watcher function.
  * @param callback {Function} The callback function.
  */
 Client.prototype.exists = function (path, watcher, callback) {
@@ -587,11 +566,7 @@ Client.prototype.exists = function (path, watcher, callback) {
     }
 
     Path.validate(path);
-
-    if (typeof callback !== 'function') {
-        throw new Error('callback must be a function.');
-    }
-
+    assert(typeof callback === 'function', 'callback must be a function.');
 
     var self = this,
         header = new jute.protocol.RequestHeader(),
@@ -627,23 +602,18 @@ Client.prototype.exists = function (path, watcher, callback) {
         );
     });
 };
+
 /**
- * For the given znode path, return the children list and the stat.
+ * For the given znode path, retrieve the children list and the stat.
  *
- * If the watcher callback is provided and the method completes succesfully,
+ * If the watcher callback is provided and the method completes successfully,
  * a watcher will be placed the given znode. The watcher will be triggered
- * when a operation successfully deletes the given znode or create/delete
+ * when an operation successfully deletes the given znode or creates/deletes
  * the child under it.
- *
- * callback prototype:
- * callback(error, children, stat);
- *
- * watcher prototype:
- * callback(type, path);
  *
  * @method getChildren
  * @param path {String} The znode path.
- * @param watcher {Function} The watcher function, optional.
+ * @param [watcher] {Function} The watcher function.
  * @param callback {Function} The callback function.
  */
 Client.prototype.getChildren = function (path, watcher, callback) {
@@ -653,11 +623,7 @@ Client.prototype.getChildren = function (path, watcher, callback) {
     }
 
     Path.validate(path);
-
-    if (typeof callback !== 'function') {
-        throw new Error('callback must be a function.');
-    }
-
+    assert(typeof callback === 'function', 'callback must be a function.');
 
     var self = this,
         header = new jute.protocol.RequestHeader(),
@@ -686,65 +652,65 @@ Client.prototype.getChildren = function (path, watcher, callback) {
 };
 
 /**
- * Make sure all nodes in the path are created.
+ * Create znode path in the similar way of `mkdir -p`
  *
- * callback prototype:
- * callback(error, path)
  *
  * @method mkdirp
  * @param path {String} The znode path.
+ * @param [data=undefined] {Buffer} The data buffer.
  * @param [acls=ACL.OPEN_ACL_UNSAFE] {Array} The array of ACL object.
  * @param [mode=CreateMode.PERSISTENT] {CreateMode} The creation mode.
- * @param [data=undefined] {Buffer} The data buffer.
  * @param callback {Function} The callback function.
  */
-Client.prototype.mkdirp = function (path, acls, mode, data, callback) {
-    // TODO: data as the second parameter
-    if (arguments.length < 2) {
-        throw new Error(
-            'mkdirp need at least the path and callback arguments.'
-        );
-    }
-
-    callback = arguments[arguments.length - 1];
-    acls = mode = data = undefined;
+Client.prototype.mkdirp = function (path, data, acls, mode, callback) {
+    assert(
+        arguments.length >= 2 && arguments.length <= 5,
+        'mkdirp needs at least the path and callback arguments.'
+    );
 
     Path.validate(path);
+    callback = arguments[arguments.length - 1];
 
-    if (typeof callback !== 'function') {
-        throw new Error('callback must be a function.');
-    }
+    assert(
+        typeof callback === 'function',
+        'callback must be a function.'
+    );
 
-    var self = this,
-        nodes = path.split('/').slice(1), // Remove the empty string
-        currentPath = '',
-        i;
+    data = acls = mode = undefined;
 
-    for (i = 1; i < arguments.length - 1; i += 1) {
-        if (Array.isArray(arguments[i])) {
-            acls = arguments[i];
-        } else if (typeof arguments[i] === 'number') {
-            mode = arguments[i];
-        } else if (Buffer.isBuffer(data)) {
-            data = arguments[i];
-        } else {
-            throw new Error('Unexpected argument: ' + arguments[i]);
+    Array.prototype.slice.call(arguments).forEach(function (arg, i, args) {
+        // Skip the first and the last arguments
+        if (i === 0 || i === (args.length - 1)) {
+            return;
         }
-    }
+
+        console.log(arg, i, args);
+
+        if (Array.isArray(arg)) {
+            acls = arg;
+        } else if (typeof arg === 'number') {
+            mode = arg;
+        } else if (Buffer.isBuffer(arg)) {
+            data = arg;
+        }
+    });
 
 
     acls = acls || ACL.OPEN_ACL_UNSAFE;
     mode = typeof mode === 'number' ? mode : CreateMode.PERSISTENT;
 
-    if (acls.length < 1) {
-        throw new Error('acls must be a non-empty array.');
-    }
+    assert(acls.length > 0, 'acls must be a non-empty array.');
 
-    if (Buffer.isBuffer(data) && data.length > DATA_SIZE_LIMIT) {
-        throw new Error(
+    if (Buffer.isBuffer(data)) {
+        assert(
+            data.length <= DATA_SIZE_LIMIT,
             'data must be equal of smaller than ' + DATA_SIZE_LIMIT + ' bytes.'
         );
     }
+
+    var self = this,
+        nodes = path.split('/').slice(1), // Remove the empty string
+        currentPath = '';
 
     async.eachSeries(nodes, function (node, next) {
         currentPath = currentPath + '/' + node;
@@ -774,6 +740,9 @@ Client.prototype.transaction = function () {
 
 /**
  * Create a new ZooKeeper client.
+ *
+ * @method createClient
+ * @for node-zookeeper-client
  */
 function createClient(connectionString, options) {
     return new Client(connectionString, options);
