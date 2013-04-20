@@ -12,7 +12,7 @@ npm install node-zookeeper-client
 
 ## Quick Examples
 
-Create a znode using given path:
+Create a node using given path:
 
 ```javascript
 var zookeeper = require('node-zookeeper-client');
@@ -37,7 +37,7 @@ client.once('connected', function () {
 client.connect();
 ```
 
-List and watch the children of given znode:
+List and watch the children of given node:
 
 ```javascript
 var zookeeper = require('node-zookeeper-client');
@@ -79,7 +79,7 @@ client.connect();
 
 #### createClient(connectionString, [options])
 
-Factory method to create a new zookeeper client instance.
+Factory method to create a new zookeeper [client](#client) instance.
 
 **Arguments**
 
@@ -87,22 +87,22 @@ Factory method to create a new zookeeper client instance.
   represents a ZooKeeper server. You can optionally append a chroot path, then
   the client would be rooted at the given path. e.g.
 
-  `"localhost:3000,locahost:3001,localhost:3002"`
-  
-  `"localhost:2181,localhost:2182/test"`
+  + `"localhost:3000,locahost:3001,localhost:3002"`
+  + `"localhost:2181,localhost:2182/test"`
 
-* options `Object` - An object to set the client options. Available options
-  are:
+* options `Object` - An object to set the client options. Currently available
+  options are:
 
   + `sessionTimeout` Session timeout in milliseconds, defaults to 30 seconds.
-  + `spinDelay` The delay between trying different servers, in milliseconds.
+  + `spinDelay` The delay (in milliseconds) between each connection attempts.
 
   Defaults options:
-  ```javascript
-  {
-    sessionTimeout: 30000,
-    spinDelay : 1000
-  }
+    ```javascript
+    {
+        sessionTimeout: 30000,
+        spinDelay : 1000
+    }
+    ```
 
 **Example**
 
@@ -117,16 +117,56 @@ var client = zookeeper.createClient(
 
 ### Client
 
+This is the main class of ZooKeeper client library. An application must
+use [`createClient`](#createclientconnectionstring-options) method to
+instantiate the client.
+
+Once a connection from the client to the server is established, a session id is
+assigned to the client. The client will starts sending heart beats to the server
+periodically to keep the session valid.
+
+If the client fails to send heart beats to the server for a prolonged period of
+time (exceeding the sessionTimeout value), the server will expire the session.
+The client object will no longer be usable.
+
+If the ZooKeeper server the client currently connects to fails or otherwise
+does not respond, the client will automatically try to connect to another server
+before its session times out. If successful, the application can continue to
+use the client.
+
+---
+
+#### connect()
+
+Initiate the connection to the provided server list (ensemble). The client will
+pick an arbitrary server from the list and attempt to connect to it. If the
+establishment of the connection fails, another server will be tried (picked
+randomly) until a connection is established or [close](#close) method is
+invoked.
+
+---
+
+#### close()
+
+Close this client. Once the client is closed, its session becomes invalid.
+All the ephemeral nodes in the ZooKeeper server associated with the session
+will be removed. The watchers left on those nodes (and on their parents) will
+be triggered.
+
+---
+
 #### create(path, [data], [acls], [mode], callback)
 
-Create a znode with given path, data, acls and mode.
+Create a node with given path, data, acls and mode.
 
 **Argument**
 
-* path `String` - Path of the znode.
+* path `String` - Path of the node.
 * data `Buffer` - The data buffer, optional.
-* acls `Array` - An array of ACL objects, defaults to `ACL.OPEN_ACL_UNSAFE` 
-* mode `CreateMode` -  The creation mode, defaults to `CreateMode.PERSISTENT`
+* acls `Array` - An array of [ACL](#acl) objects, optional, defaults to
+  `ACL.OPEN_ACL_UNSAFE` 
+* mode `CreateMode` -  The creation mode, optional, defaults to
+  `CreateMode.PERSISTENT`
 * callback(error, path) `Function` - The callback function.
 
 **Example**
