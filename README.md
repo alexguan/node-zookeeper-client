@@ -113,6 +113,8 @@ var client = zookeeper.createClient(
 );
 ```
 
+---
+
 ### Client
 
 #### create(path, [data], [acls], [mode], callback)
