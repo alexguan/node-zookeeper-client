@@ -74,7 +74,7 @@ client.once('connected', function () {
 
 client.connect();
 ```
-
+More examples can be found [here](tree/master/examples).
 ## Documentation
 
 #### createClient(connectionString, [options])
@@ -134,7 +134,6 @@ does not respond, the client will automatically try to connect to another server
 before its session times out. If successful, the application can continue to
 use the client.
 
----
 
 #### connect()
 
@@ -182,3 +181,27 @@ zookeeper.create(
     }
 );
 ```
+
+---
+
+#### remove(path, [version], callback)
+
+Delete a node with the given path. If version is provided and not equal to -1,
+the request will fail when the provided version does not match the server
+version.
+
+**Argument**
+
+* path `String` - Path of the node.
+* version `Number` - The version of the node, optional, defaults to -1.
+* callback(error) `Function` - The callback function.
+
+**Example**
+
+```javascript
+zookeeper.remove('/test/demo', function (error) {
+  //...
+);
+```
+
+### Events
