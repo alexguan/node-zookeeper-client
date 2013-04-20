@@ -1,6 +1,6 @@
 var zookeeper = require('../index.js');
 
-var client = zookeeper.createClient(process.argv[2] || 'localhost:2181');
+var client = zookeeper.createClient(process.argv[2]);
 var path = process.argv[3];
 
 function listChildren(client, path) {
