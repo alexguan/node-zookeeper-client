@@ -1,30 +1,26 @@
 var zookeeper = require('../index.js');
 
-var client = zookeeper.createClient(
-    process.argv[2] || 'localhost:2181',
-    {
-        timeout : 30000,
-        spinDelay : 1000
-    }
-);
-
+var client = zookeeper.createClient(process.argv[2] || 'localhost:2181');
 var path = process.argv[3];
 
 function listChildren(client, path) {
     client.getChildren(
         path,
         function (event) {
-            console.log('Got event: %s', event);
+            console.log('Got watcher event: %s', event);
             listChildren(client, path);
         },
         function (error, children, stat) {
             if (error) {
-                console.log('Got error when listing children:');
-                console.log(error.stack);
+                console.log(
+                    'Failed to list children of node: %s due to: %s.',
+                    path,
+                    error
+                );
                 return;
             }
 
-            console.log('Children of %s: %j', path, children);
+            console.log('Children of node: %s are: %j.', path, children);
         }
     );
 }
