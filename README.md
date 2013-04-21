@@ -206,7 +206,113 @@ zookeeper.remove('/test/demo', -1, function (error) {
 
 ---
 
-### setData(path, data, [version], callback)
+#### exists(path, [watcher], callback)
+
+Check the existence of a node. The callback will be invoked with the
+stat of the given path, or null if no such node exists.
+
+If the watcher function is provided and the operation is successful (no error),
+a watcher will be placed on the node with the given path. The watcher will be
+triggered by a successful operation that creates the node, deletes the node or
+sets the data on the node.
+
+**Arguments**
+
+* path `String` - Path of the node.
+* watcher(event) `Function` - The watcher function, optional. The `event` is an
+  instance of [`Event`](#event)
+* callback(error, stat) `Function` - The callback function. The `stat` is an
+  instance of [`Stat`](#stat).
+
+**Example**
+
+```javascript
+zookeeper.exists('/test/demo', function (error, stat) {
+    if (error) {
+        console.log(error);
+        return;
+    }
+
+    if (stat) {
+        console.log('Node exists.');
+    } else {
+        console.log('Node does not exist.');
+    }
+);
+```
+
+---
+
+#### getChildren(path, [watcher], callback)
+
+For the given node path, retrieve the children list and the stat. The children
+will be an unordered list of strings.
+
+If the watcher callback is provided and the operation is successfully, a watcher
+will be placed the given node. The watcher will be triggered
+when an operation successfully deletes the given node or creates/deletes
+the child under it.
+
+**Arguments**
+
+* path `String` - Path of the node.
+* watcher(event) `Function` - The watcher function, optional. The `event` is an
+  instance of [`Event`](#event)
+* callback(error, children, stat) `Function` - The callback function. The
+  children is an array of strings and the `stat` is an instance of
+  [`Stat`](#stat).
+
+**Example**
+
+```javascript
+zookeeper.getChildren('/test/demo', function (error, children, stats) {
+    if (error) {
+        console.log(error);
+        return;
+    }
+
+    console.log('Children are: %j.', children);
+);
+```
+
+#### getData(path, [watcher], callback)
+
+Retrieve the data and the stat of the node of the given path. If the watcher
+function is provided and the operation is successful (no error), a watcher
+will be placed on the node with the given path. The watch will be triggered by
+a successful operation which sets data on the node, or deletes the node.
+
+**Arguments**
+
+* path `String` - Path of the node.
+* watcher(event) `Function` - The watcher function, optional. The `event` is an
+  instance of [`Event`](#event)
+* callback(error, data, stat) `Function` - The callback function. The `data` is
+  an instance of [`Buffer`](http://nodejs.org/api/buffer.html) and stat is an
+  instance of [`Stat`](#stat).
+
+**Example**
+
+```javascript
+zookeeper.getData(
+    '/test/demo',
+    function (event) {
+        console.log('Got event: %s.', event);
+    },
+    function (error, data, stat) {
+        if (error) {
+            console.log(error.stack);
+            return;
+        }
+
+        console.log('Got data: %s', data.toString('utf8'));
+    }
+);
+```
+
+---
+
+#### setData(path, data, [version], callback)
 
 Set the data for the node of the given path if such a node exists and the
 optional given version matches the version of the node (if the given
@@ -230,40 +336,5 @@ zookeeper.setData('/test/demo', null, 2, function (error, stat) {
 ```
 
 ---
-
-### getData(path, [watcher], callback)
-
-Retrieve the data and the stat of the node of the given path. If the watcher
-function is provided and the operation is successful (no error), a watcher
-will be left on the node with the given path. The watch will be triggered by a
-successful operation which sets data on the node, or deletes the node.
-
-**Arguments**
-
-* path `String` - Path of the node.
-* watcher(event) `Function` - The watcher function. The `event` is an instance
-  of [`Event`](#event)
-* callback(error, data, stat) `Function` - The callback function. The `data` is
-  an instance of [`Buffer`](http://nodejs.org/api/buffer.html) and stat is an
-  instance of [`Stat`](#stat).
-
-**Example**
-
-```javascript
-zookeeper.getData(
-    '/test/demo',
-    function (event) {
-        console.log('Got event: %s.', event);
-    },
-    function (error, data, stat) {
-        if (error) {
-            console.log(error.stack);
-            return;
-        }
-
-        console.log('Got data: %s', data.toString('utf8'));
-    }
-);
-```
 
 ### Events
