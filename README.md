@@ -186,9 +186,9 @@ zookeeper.create(
 
 #### remove(path, [version], callback)
 
-Delete a node with the given path. If version is provided and not equal to -1,
-the request will fail when the provided version does not match the server
-version.
+Delete a node with the given path and version. If version is provided and not
+equal to -1, the request will fail when the provided version does not match the
+server version.
 
 **Argument**
 
@@ -199,8 +199,69 @@ version.
 **Example**
 
 ```javascript
-zookeeper.remove('/test/demo', function (error) {
-  //...
+zookeeper.remove('/test/demo', -1, function (error) {
+    //...
+);
+```
+
+---
+
+### setData(path, data, [version], callback)
+
+Set the data for the node of the given path if such a node exists and the
+optional given version matches the version of the node (if the given
+version is -1, it matches any node's versions). The [stat](#stat) of the node
+will be returned through the callback function.
+
+**Arguments**
+
+* path `String` - Path of the node.
+* data `Buffer` - The data buffer.
+* version `Number` - The version of the node, optional, defaults to -1.
+* callback(error, stat) `Function` - The callback function. The `stat` is an
+  instance of [`Stat`](#stat).
+
+**Example**
+
+```javascript
+zookeeper.setData('/test/demo', null, 2, function (error, stat) {
+    //...
+);
+```
+
+---
+
+### getData(path, [watcher], callback)
+
+Retrieve the data and the stat of the node of the given path. If the watcher
+function is provided and the operation is successful (no error), a watcher
+will be left on the node with the given path. The watch will be triggered by a
+successful operation which sets data on the node, or deletes the node.
+
+**Arguments**
+
+* path `String` - Path of the node.
+* watcher(event) `Function` - The watcher function. The `event` is an instance
+  of [`Event`](#event)
+* callback(error, data, stat) `Function` - The callback function. The `data` is
+  an instance of `Buffer` and stat is an instance of [`Stat`](#stat).
+
+**Example**
+
+```javascript
+zookeeper.getData(
+    '/test/demo',
+    function (event) {
+        console.log('Got event: %s.', event);
+    },
+    function (error, data, stat) {
+        if (error) {
+            console.log(error.stack);
+            return;
+        }
+
+        console.log('Got data: %s', data.toString('utf8'));
+    }
 );
 ```
 

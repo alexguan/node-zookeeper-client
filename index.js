@@ -231,10 +231,10 @@ Client.prototype.addAuthInfo = function (scheme, auth) {
 };
 
 /**
- * Create a znode with given path, data, acls and mode.
+ * Create a node with given path, data, acls and mode.
  *
  * @method create
- * @param path {String} The znode path.
+ * @param path {String} The node path.
  * @param [data=undefined] {Buffer} The data buffer.
  * @param [acls=ACL.OPEN_ACL_UNSAFE] {Array} An array of ACL object.
  * @param [mode=CreateMode.PERSISTENT] {CreateMode} The creation mode.
@@ -318,12 +318,12 @@ Client.prototype.create = function (path, data, acls, mode, callback) {
 };
 
 /**
- * Delete a znode with the given path. If version is not -1, the request will
+ * Delete a node with the given path. If version is not -1, the request will
  * fail when the provided version does not match the server version.
  *
  * @method delete
- * @param path {String} The znode path.
- * @param [version=-1] {Number} The version of the znode.
+ * @param path {String} The node path.
+ * @param [version=-1] {Number} The version of the node.
  * @param callback {Function} The callback function.
  */
 Client.prototype.remove = function (path, version, callback) {
@@ -360,14 +360,14 @@ Client.prototype.remove = function (path, version, callback) {
 };
 
 /**
- * Set the data for the znode of the given path if such a node exists and the
- * optional given version matches the version of the znode (if the given
+ * Set the data for the node of the given path if such a node exists and the
+ * optional given version matches the version of the node (if the given
  * version is -1, it matches any node's versions).
  *
  * @method setData
- * @param path {String} The znode path.
+ * @param path {String} The node path.
  * @param data {Buffer} The data buffer.
- * @param [version=-1] {Number} The version of the znode.
+ * @param [version=-1] {Number} The version of the node.
  * @param callback {Function} The callback function.
  */
 Client.prototype.setData = function (path, data, version, callback) {
@@ -417,16 +417,16 @@ Client.prototype.setData = function (path, data, version, callback) {
 
 /**
  *
- * Retrieve the data and the stat of the znode of the given path.
+ * Retrieve the data and the stat of the node of the given path.
  *
  * If the watcher is provided and the call is successful (no error), a watcher
- * will be left on the znode with the given path.
+ * will be left on the node with the given path.
  *
  * The watch will be triggered by a successful operation that sets data on
  * the node, or deletes the node.
  *
  * @method getData
- * @param path {String} The znode path.
+ * @param path {String} The node path.
  * @param [watcher] {Function} The watcher function.
  * @param callback {Function} The callback function.
  */
@@ -467,15 +467,15 @@ Client.prototype.getData = function (path, watcher, callback) {
 };
 
 /**
- * Set the ACL for the znode of the given path if such a node exists and the
+ * Set the ACL for the node of the given path if such a node exists and the
  * given version matches the version of the node (if the given version is -1,
  * it matches any node's versions).
  *
  *
  * @method setACL
- * @param path {String} The znode path.
+ * @param path {String} The node path.
  * @param acls {Array} The array of ACL objects.
- * @param [version] {Number} The version of the znode.
+ * @param [version] {Number} The version of the node.
  * @param callback {Function} The callback function.
  */
 Client.prototype.setACL = function (path, acls, version, callback) {
@@ -518,10 +518,10 @@ Client.prototype.setACL = function (path, acls, version, callback) {
 };
 
 /**
- * Retrieve the ACL and the stat of the znode of the given path.
+ * Retrieve the ACL and the stat of the node of the given path.
  *
  * @method getACL
- * @param path {String} The znode path.
+ * @param path {String} The node path.
  * @param callback {Function} The callback function.
  */
 Client.prototype.getACL = function (path, callback) {
@@ -557,8 +557,8 @@ Client.prototype.getACL = function (path, callback) {
 };
 
 /**
- * Check the existence of a znode. The callback will be invoked with the
- * stat of the given path, or null if node such znode exists.
+ * Check the existence of a node. The callback will be invoked with the
+ * stat of the given path, or null if node such node exists.
  *
  * If the watcher function is provided and the call is successful (no error
  * from callback), a watcher will be placed on the node with the given path.
@@ -566,7 +566,7 @@ Client.prototype.getACL = function (path, callback) {
  * the node or sets the data on the node.
  *
  * @method exists
- * @param path {String} The znode path.
+ * @param path {String} The node path.
  * @param [watcher] {Function} The watcher function.
  * @param callback {Function} The callback function.
  */
@@ -615,15 +615,15 @@ Client.prototype.exists = function (path, watcher, callback) {
 };
 
 /**
- * For the given znode path, retrieve the children list and the stat.
+ * For the given node path, retrieve the children list and the stat.
  *
  * If the watcher callback is provided and the method completes successfully,
- * a watcher will be placed the given znode. The watcher will be triggered
- * when an operation successfully deletes the given znode or creates/deletes
+ * a watcher will be placed the given node. The watcher will be triggered
+ * when an operation successfully deletes the given node or creates/deletes
  * the child under it.
  *
  * @method getChildren
- * @param path {String} The znode path.
+ * @param path {String} The node path.
  * @param [watcher] {Function} The watcher function.
  * @param callback {Function} The callback function.
  */
@@ -663,11 +663,11 @@ Client.prototype.getChildren = function (path, watcher, callback) {
 };
 
 /**
- * Create znode path in the similar way of `mkdir -p`
+ * Create node path in the similar way of `mkdir -p`
  *
  *
  * @method mkdirp
- * @param path {String} The znode path.
+ * @param path {String} The node path.
  * @param [data=undefined] {Buffer} The data buffer.
  * @param [acls=ACL.OPEN_ACL_UNSAFE] {Array} The array of ACL object.
  * @param [mode=CreateMode.PERSISTENT] {CreateMode} The creation mode.
