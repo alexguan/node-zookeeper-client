@@ -176,8 +176,12 @@ zookeeper.create(
     new Buffer('data'),
     CreateMode.EPHEMERAL,
     function (error, path) {
-        // error is an instance of zookeeper.Exception class.
-        // When creation is done, the created path will be returned.
+        if (error) {
+            console.log(error.stack);
+            return;
+        }
+
+        console.log('Node: %s is created.', path);
     }
 );
 ```
@@ -200,7 +204,12 @@ server version.
 
 ```javascript
 zookeeper.remove('/test/demo', -1, function (error) {
-    //...
+    if (error) {
+        console.log(error.stack);
+        return;
+    }
+
+    console.log('Node is deleted.');
 );
 ```
 
@@ -229,7 +238,7 @@ sets the data on the node.
 ```javascript
 zookeeper.exists('/test/demo', function (error, stat) {
     if (error) {
-        console.log(error);
+        console.log(error.stack);
         return;
     }
 
@@ -267,7 +276,7 @@ the child under it.
 ```javascript
 zookeeper.getChildren('/test/demo', function (error, children, stats) {
     if (error) {
-        console.log(error);
+        console.log(error.stack);
         return;
     }
 
@@ -331,10 +340,83 @@ will be returned through the callback function.
 
 ```javascript
 zookeeper.setData('/test/demo', null, 2, function (error, stat) {
-    //...
+    if (error) {
+        console.log(error.stack);
+        return;
+    }
+
+    console.log('Data is set.');
+});
+```
+
+---
+
+#### getACL(path, callback)
+
+Retrieve the list of [ACL](#acl) and stat of the node of the given path.
+
+**Arguments**
+
+* path `String` - Path of the node.
+* callback(error, acls, stat) `Function` - The callback function. `acls` is an
+  array of [`ACL`](#acl) instances. The `stat` is an instance of
+  [`Stat`](#stat).
+
+**Example**
+
+```javascript
+zookeeper.getACL('/test/demo', function (error, acls, stat) {
+    if (error) {
+        console.log(error.stack);
+        return;
+    }
+
+    console.log('ACL(s) are: %j', acls);
+});
+```
+
+---
+
+#### setACL(path, acls, [version], callback)
+
+Set the [ACL](#acl) for the node of the given path if such a node exists and the
+given version (optional) matches the version of the node on the server. (if the
+given version is -1, it matches any versions).
+
+**Arguments**
+
+* path `String` - Path of the node.
+* acls `Array` - An array of [`ACL`](#acl) instances.
+* version `Number` - The version of the node, optional, defaults to -1.
+* callback(error, stat) `Function` - The callback function. The `stat` is an
+  instance of [`Stat`](#stat).
+
+**Example**
+
+```javascript
+zookeeper.setACL(
+    '/test/demo',
+    [
+        new zookeeper.ACL(
+            zookeeeper.Permission.ADMIN,
+            new zookeeper.Id('ip', '127.0.0.1')
+        )
+    ],
+    function (error, acls, stat) {
+        if (error) {
+            console.log(error.stack);
+            return;
+        }
+
+        console.log('New ACL is set.');
+    }
 );
 ```
 
 ---
 
 ### Events
+
+### Transaction
+
+### Exception

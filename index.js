@@ -518,7 +518,7 @@ Client.prototype.setACL = function (path, acls, version, callback) {
 };
 
 /**
- * Retrieve the ACL and the stat of the node of the given path.
+ * Retrieve the ACL list and the stat of the node of the given path.
  *
  * @method getACL
  * @param path {String} The node path.
@@ -544,15 +544,15 @@ Client.prototype.getACL = function (path, callback) {
             return;
         }
 
-        var acl;
+        var acls;
 
         if (Array.isArray(response.payload.acl)) {
-            acl = response.payload.acl.map(function (item) {
+            acls = response.payload.acl.map(function (item) {
                 return ACL.fromRecord(item);
             });
         }
 
-        callback(null, acl, response.payload.stat);
+        callback(null, acls, response.payload.stat);
     });
 };
 
