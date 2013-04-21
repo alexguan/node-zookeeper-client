@@ -244,7 +244,8 @@ successful operation which sets data on the node, or deletes the node.
 * watcher(event) `Function` - The watcher function. The `event` is an instance
   of [`Event`](#event)
 * callback(error, data, stat) `Function` - The callback function. The `data` is
-  an instance of `Buffer` and stat is an instance of [`Stat`](#stat).
+  an instance of [`Buffer`](http://nodejs.org/api/buffer.html) and stat is an
+  instance of [`Stat`](#stat).
 
 **Example**
 
