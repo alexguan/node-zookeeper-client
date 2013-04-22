@@ -46,7 +46,7 @@ $ npm install node-zookeeper-client
 
 ## Example
 
-1. Create a node using given path:
+1\. Create a node using given path:
 
 ```javascript
 var zookeeper = require('node-zookeeper-client');
@@ -71,7 +71,7 @@ client.once('connected', function () {
 client.connect();
 ```
 
-2. List and watch the children of given node:
+2\. List and watch the children of given node:
 
 ```javascript
 var zookeeper = require('node-zookeeper-client');
