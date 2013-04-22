@@ -124,23 +124,22 @@ Factory method to create a new zookeeper [client](#client) instance.
   represents a ZooKeeper server. You can optionally append a chroot path, then
   the client would be rooted at the given path. e.g.
 
-    * `"localhost:3000,locahost:3001,localhost:3002"`
-    * `"localhost:2181,localhost:2182/test"`
+        * `"localhost:3000,locahost:3001,localhost:3002"`
+        * `"localhost:2181,localhost:2182/test"`
 
 * options `Object` - An object to set the client options. Currently available
   options are:
-
-    * `sessionTimeout` Session timeout in milliseconds, defaults to 30 seconds.
-    * `spinDelay` The delay (in milliseconds) between each connection attempts.
+        * `sessionTimeout` Session timeout in milliseconds, defaults to 30 seconds.
+        * `spinDelay` The delay (in milliseconds) between each connection attempts.
 
   Defaults options:
 
-    ```javascript
-    {
-        sessionTimeout: 30000,
-        spinDelay : 1000
-    }
-    ```
+        ```javascript
+        {
+            sessionTimeout: 30000,
+            spinDelay : 1000
+        }
+        ```
 
 **Example**
 
