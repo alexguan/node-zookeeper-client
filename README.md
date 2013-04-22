@@ -1,13 +1,14 @@
 # node-zookeeper-client
 
-A pure Javascript [ZooKeeper](http://zookeeper.apache.org) client for Node.js.
+A pure Javascript [ZooKeeper](http://zookeeper.apache.org) client module for
+[Node.js](http://nodejs.org).
 
 ## Installation
 
 You can install it using npm:
 
 ```bash
-npm install node-zookeeper-client
+$ npm install node-zookeeper-client
 ```
 
 ## Quick Examples
@@ -120,7 +121,7 @@ var client = zookeeper.createClient(
 
 ### Client
 
-This is the main class of ZooKeeper client library. An application must
+This is the main class of ZooKeeper client module. An application must
 use [`createClient`](#createclientconnectionstring-options) method to
 instantiate the client.
 
@@ -644,11 +645,15 @@ Execute the transaction atomically.
 * callback(error, results) `Function` - The callback function.
 
 
-
-#### Transaction 
-
 ### Exception
 
-### License
+## Dependency
 
-This library is licensed under [MIT License](raw/master/LICENSE)
+This module depends on the following third-party libraries:
+
+* [async](https://github.com/caolan/async)
+* [underscore](http://underscorejs.org)
+
+## License
+
+This module is licensed under [MIT License](raw/master/LICENSE)
