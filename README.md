@@ -651,4 +651,4 @@ Execute the transaction atomically.
 
 ### License
 
-This library is licensed under [MIT License](/raw/master/LICENSE)
+This library is licensed under [MIT License](raw/master/LICENSE)
