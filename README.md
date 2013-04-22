@@ -74,6 +74,7 @@ client.once('connected', function () {
 
 client.connect();
 ```
+
 More examples can be found [here](tree/master/examples).
 ## Documentation
 
@@ -161,7 +162,7 @@ Create a node with given path, data, acls and mode.
 **Argument**
 
 * path `String` - Path of the node.
-* data `Buffer` - The data buffer, optional.
+* data `Buffer` - The data buffer, optional, defaults to null.
 * acls `Array` - An array of [ACL](#acl) objects, optional, defaults to
   `ACL.OPEN_ACL_UNSAFE` 
 * mode `CreateMode` -  The creation mode, optional, defaults to
@@ -218,7 +219,7 @@ zookeeper.remove('/test/demo', -1, function (error) {
 #### exists(path, [watcher], callback)
 
 Check the existence of a node. The callback will be invoked with the
-stat of the given path, or null if no such node exists.
+stat of the given path, or `null` if no such node exists.
 
 If the watcher function is provided and the operation is successful (no error),
 a watcher will be placed on the node with the given path. The watcher will be
@@ -411,6 +412,129 @@ zookeeper.setACL(
         console.log('New ACL is set.');
     }
 );
+```
+
+---
+
+#### transaction()
+
+Create and return a new Transaction instance which provides a builder object
+that can be used to construct and commit a set of operations atomically.
+
+See [Transaction](#transaction) for details.
+
+
+**Example**
+
+```javascript
+var transaction = zookeeper.transaction();
+```
+
+---
+
+#### mkdirp(path, [data], [acls], [mode], callback)
+
+Create given path in a way similar to `mkdir -p`.
+
+**Argument**
+
+* path `String` - Path of the node.
+* data `Buffer` - The data buffer, optional, defaults to `null`.
+* acls `Array` - An array of [ACL](#acl) objects, optional, defaults to
+  `ACL.OPEN_ACL_UNSAFE` 
+* mode `CreateMode` -  The creation mode, optional, defaults to
+  `CreateMode.PERSISTENT`
+* callback(error, path) `Function` - The callback function.
+
+**Example**
+
+```javascript
+zookeeper.mkdirp('/test/demo/1/2/3', function (error, path) {
+    if (error) {
+        console.log(error.stack);
+        return;
+    }
+
+    console.log('Node: %s is created.', path);
+});
+```
+
+---
+
+#### addAuthInfo(scheme, auth)
+
+Add the specified scheme:auth information to this client.
+
+**Argument**
+
+* scheme `String` - The authentication scheme.
+* auth `Buffer` - The authentication data buffer.
+
+**Example**
+
+```javascript
+zookeeper.setAuthInfo('ip', new Buffer('127.0.0.1');
+```
+
+---
+
+#### getState()
+
+Return the current client [state](#state).
+
+**Example**
+
+```javascript
+var state = zookeeper.getState();
+console.log('Current state is: %s', state);
+```
+
+---
+
+#### getSessionId()
+
+Returns the session id of this client instance. The value returned is not valid
+until the client connects to a server and may change after a re-connect.
+
+The id returned is a long integer stored into a 8 bytes
+[`Buffer`](http://nodejs.org/api/buffer.html) since Javascript does not support
+long integer natively.
+
+**Example**
+
+```javascript
+var id = zookeeper.getSessionId();
+console.log('Session id is: %s', id.toString('hex'));
+```
+
+---
+
+#### getSessionPassword()
+
+Returns the session password of this client instance. The value returned is not
+valid until the client connects to a server and may change after a re-connect.
+
+The value returned is an instance of
+[`Buffer`](http://nodejs.org/api/buffer.html).
+
+**Example**
+
+```javascript
+var pwd = zookeeper.getSessionPassword();
+```
+
+---
+
+#### getSessionTimeout()
+ 
+Returns the *negotiated* session timeout (in milliseconds) for this client
+instance. The value returned is not valid until the client connects to a server
+and may change after a re-connect.
+
+**Example**
+
+```javascript
+var sessionTimeout = zookeeper.getSessionTimeout();
 ```
 
 ---
