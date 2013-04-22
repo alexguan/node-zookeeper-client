@@ -538,8 +538,111 @@ var sessionTimeout = zookeeper.getSessionTimeout();
 
 ---
 
-### Events
+### Event
+
+There are two type of events will be emitted by the client: client state event
+and watcher event.
+
+The client state transition is depicted int the ZooKeeper programmer guide:
+![state transition](http://zookeeper.apache.org/doc/r3.4.5/images/state_dia.jpg)
+
+There are two ways to watch the client state events. You can either register
+individual event listeners on the specific events (Node.js convention) or you
+can register one event listener for `state` event (Java client convention).
+
+#### Client State Events
+
+* `connected` - Client is connected and ready.
+* `connectedReadOnly` - Client is connected to a readonly server.
+* `disconnected` - The connection between client and server is dropped.
+* `expired` - The client session is expired.
+* `authenticationFailed` - Failed to authenticate with the server.
+* `state` - Whenever client state is changed, this event will be emitted and
+  the listener will be invoked with an instance of `State`.
+
+For watcher event, client need to register the watcher function on specific
+methods. There is no global watcher event listener support.
+
 
 ### Transaction
+
+Transaction provides a builder interface to construct and commit a set of
+operations atomically.
+
+**Example**
+
+```javascript
+var client = zookeeper.createClient(process.argv[2] || 'localhost:2181');
+
+client.once('connected', function () {
+    client.transaction().
+        create('/txn').
+        create('/txn/1', new Buffer('transaction')).
+        setData('/txn/1', new Buffer('test'), -1).
+        check('/txn/1').
+        remove('/txn/1', -1).
+        remove('/txn').
+        commit(function (error, results) {
+            if (error) {
+                console.log(
+                    'Failed to execute the transaction: %s, results: %j',
+                    error,
+                    results
+                );
+
+                return;
+            }
+
+            console.log('Transaction completed.');
+            client.close();
+        });
+});
+
+client.connect();
+```
+
+#### Transaction create(path, [data], [acls], [mode])
+
+Add a create operation with given path, data, acls and mode.
+
+**Argument**
+
+* path `String` - Path of the node.
+* data `Buffer` - The data buffer, optional, defaults to null.
+* acls `Array` - An array of [ACL](#acl) objects, optional, defaults to
+  `ACL.OPEN_ACL_UNSAFE` 
+* mode `CreateMode` -  The creation mode, optional, defaults to
+  `CreateMode.PERSISTENT`
+
+
+#### Transaction check(path, [version])
+
+Add a check (existence) operation with given path and optional version.
+
+**Argument**
+
+* path `String` - Path of the node.
+* version `Number` - The version of the node, optional, defaults to -1.
+
+#### Transaction remove(path, data, version)
+ 
+Add a delete operation with the given path and optional version.
+
+**Arguments**
+
+* path `String` - Path of the node.
+* version `Number` - The version of the node, optional, defaults to -1.
+
+#### void commit(callback)
+
+Execute the transaction atomically.
+
+**Arguments**
+
+* callback(error, results) `Function` - The callback function.
+
+
+
+#### Transaction 
 
 ### Exception
