@@ -78,7 +78,7 @@ client.connect();
 More examples can be found [here](tree/master/examples).
 ## Documentation
 
-#### createClient(connectionString, [options])
+#### Client createClient(connectionString, [options])
 
 Factory method to create a new zookeeper [client](#client) instance.
 
@@ -135,8 +135,7 @@ does not respond, the client will automatically try to connect to another server
 before its session times out. If successful, the application can continue to
 use the client.
 
-
-#### connect()
+#### void connect()
 
 Initiate the connection to the provided server list (ensemble). The client will
 pick an arbitrary server from the list and attempt to connect to it. If the
@@ -146,7 +145,7 @@ invoked.
 
 ---
 
-#### close()
+#### void close()
 
 Close this client. Once the client is closed, its session becomes invalid.
 All the ephemeral nodes in the ZooKeeper server associated with the session
@@ -155,7 +154,7 @@ be triggered.
 
 ---
 
-#### create(path, [data], [acls], [mode], callback)
+#### void create(path, [data], [acls], [mode], callback)
 
 Create a node with given path, data, acls and mode.
 
@@ -189,7 +188,7 @@ zookeeper.create(
 
 ---
 
-#### remove(path, [version], callback)
+#### void remove(path, [version], callback)
 
 Delete a node with the given path and version. If version is provided and not
 equal to -1, the request will fail when the provided version does not match the
@@ -216,7 +215,7 @@ zookeeper.remove('/test/demo', -1, function (error) {
 
 ---
 
-#### exists(path, [watcher], callback)
+#### void exists(path, [watcher], callback)
 
 Check the existence of a node. The callback will be invoked with the
 stat of the given path, or `null` if no such node exists.
@@ -253,7 +252,7 @@ zookeeper.exists('/test/demo', function (error, stat) {
 
 ---
 
-#### getChildren(path, [watcher], callback)
+#### void getChildren(path, [watcher], callback)
 
 For the given node path, retrieve the children list and the stat. The children
 will be an unordered list of strings.
@@ -285,7 +284,7 @@ zookeeper.getChildren('/test/demo', function (error, children, stats) {
 );
 ```
 
-#### getData(path, [watcher], callback)
+#### void getData(path, [watcher], callback)
 
 Retrieve the data and the stat of the node of the given path. If the watcher
 function is provided and the operation is successful (no error), a watcher
@@ -322,7 +321,7 @@ zookeeper.getData(
 
 ---
 
-#### setData(path, data, [version], callback)
+#### void setData(path, data, [version], callback)
 
 Set the data for the node of the given path if such a node exists and the
 optional given version matches the version of the node (if the given
@@ -352,7 +351,7 @@ zookeeper.setData('/test/demo', null, 2, function (error, stat) {
 
 ---
 
-#### getACL(path, callback)
+#### void getACL(path, callback)
 
 Retrieve the list of [ACL](#acl) and stat of the node of the given path.
 
@@ -378,7 +377,7 @@ zookeeper.getACL('/test/demo', function (error, acls, stat) {
 
 ---
 
-#### setACL(path, acls, [version], callback)
+#### void setACL(path, acls, [version], callback)
 
 Set the [ACL](#acl) for the node of the given path if such a node exists and the
 given version (optional) matches the version of the node on the server. (if the
@@ -416,7 +415,7 @@ zookeeper.setACL(
 
 ---
 
-#### transaction()
+#### Transaction transaction()
 
 Create and return a new Transaction instance which provides a builder object
 that can be used to construct and commit a set of operations atomically.
@@ -432,7 +431,7 @@ var transaction = zookeeper.transaction();
 
 ---
 
-#### mkdirp(path, [data], [acls], [mode], callback)
+#### void mkdirp(path, [data], [acls], [mode], callback)
 
 Create given path in a way similar to `mkdir -p`.
 
@@ -461,7 +460,7 @@ zookeeper.mkdirp('/test/demo/1/2/3', function (error, path) {
 
 ---
 
-#### addAuthInfo(scheme, auth)
+#### void addAuthInfo(scheme, auth)
 
 Add the specified scheme:auth information to this client.
 
@@ -478,7 +477,7 @@ zookeeper.setAuthInfo('ip', new Buffer('127.0.0.1');
 
 ---
 
-#### getState()
+#### State getState()
 
 Return the current client [state](#state).
 
@@ -491,7 +490,7 @@ console.log('Current state is: %s', state);
 
 ---
 
-#### getSessionId()
+#### Buffer getSessionId()
 
 Returns the session id of this client instance. The value returned is not valid
 until the client connects to a server and may change after a re-connect.
@@ -509,7 +508,7 @@ console.log('Session id is: %s', id.toString('hex'));
 
 ---
 
-#### getSessionPassword()
+#### Buffer getSessionPassword()
 
 Returns the session password of this client instance. The value returned is not
 valid until the client connects to a server and may change after a re-connect.
@@ -525,7 +524,7 @@ var pwd = zookeeper.getSessionPassword();
 
 ---
 
-#### getSessionTimeout()
+#### Number getSessionTimeout()
  
 Returns the *negotiated* session timeout (in milliseconds) for this client
 instance. The value returned is not valid until the client connects to a server
