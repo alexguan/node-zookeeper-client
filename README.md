@@ -76,6 +76,8 @@ client.connect();
 ```
 
 More examples can be found [here](tree/master/examples).
+
+
 ## Documentation
 
 #### Client createClient(connectionString, [options])
@@ -646,3 +648,7 @@ Execute the transaction atomically.
 #### Transaction 
 
 ### Exception
+
+### License
+
+This library is licensed under [MIT License](/raw/master/LICENSE)

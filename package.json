@@ -1,20 +1,28 @@
 {
   "name": "node-zookeeper-client",
   "version": "0.0.1",
-  "description": "A pure Javascript zookeeper client for Node.js.",
+  "description": "A pure Javascript ZooKeeper client for Node.js.",
+  "author": "Alex Guan <alex.guan@gmail.com>",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": "",
+  "repository": {
+      "type" : "git",
+      "url" : "https://github.com/alexguan/node-zookeeper-client"
+  },
   "keywords": [
     "zookeeper",
     "client",
     "pure",
     "javascript"
   ],
-  "author": "Alex Guan",
-  "license": "BSD",
+  "licenses" : [
+    {
+      "type" : "MIT",
+      "url" : "http://github.com/alexguan/node-zookeeper-client/raw/master/LICENSE"
+    }
+  ],
   "dependencies": {
     "underscore": "~1.4.4",
     "async": "~0.2.7"

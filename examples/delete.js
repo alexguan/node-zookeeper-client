@@ -1,33 +1,23 @@
 var zookeeper = require('../index.js');
 
-var client = zookeeper.createClient(
-    process.argv[2] || 'localhost:2181',
-    {
-        timeout : 30000,
-        spinDelay : 1000
-    }
-);
-
+var client = zookeeper.createClient(process.argv[2]);
 var path = process.argv[3];
 
-client.on('state', function (state) {
-    if (state === zookeeper.State.SYNC_CONNECTED) {
-        console.log('Connected to the server.');
-        client.remove(path, function (error) {
-            if (error) {
-                console.log('Got error when deleting children: ' + error);
-                return;
-            }
+client.on('connected', function (state) {
+    console.log('Connected to the server.');
+    client.remove(path, function (error) {
+        if (error) {
+            console.log(
+                'Failed to delete node: %s due to: %s.',
+                path,
+                error
+            );
+            return;
+        }
 
-            console.log('Znode %s is deleted.', path);
-            client.close();
-        });
-    }
+        console.log('Node: %s is deleted.', path);
+        client.close();
+    });
 });
-
-client.on('error', function (error) {
-    console.log('Got error: ' + error);
-});
-
 
 client.connect();
