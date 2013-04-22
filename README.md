@@ -174,6 +174,9 @@ does not respond, the client will automatically try to connect to another server
 before its session times out. If successful, the application can continue to
 use the client.
 
+This class inherits from [events.EventEmitter](http://nodejs.org/api/events.html)
+class, see [Event](#event) for details.
+
 #### void connect()
 
 Initiate the connection to the provided server list (ensemble). The client will
