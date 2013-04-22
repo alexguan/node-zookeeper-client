@@ -4,7 +4,7 @@ A pure Javascript [ZooKeeper](http://zookeeper.apache.org) client module for
 [Node.js](http://nodejs.org).
 
 + [Installation](#installation)
-+ [Quick Examples](#quick-examples)
++ [Example](#example)
 + [Documentation](#documentation)
     + [createClient](#client-createclientconnectionstring-options)
     + [Client](#client)
@@ -44,9 +44,9 @@ You can install it using npm:
 $ npm install node-zookeeper-client
 ```
 
-## Quick Examples
+## Example
 
-Create a node using given path:
+1. Create a node using given path:
 
 ```javascript
 var zookeeper = require('node-zookeeper-client');
@@ -71,7 +71,7 @@ client.once('connected', function () {
 client.connect();
 ```
 
-List and watch the children of given node:
+2. List and watch the children of given node:
 
 ```javascript
 var zookeeper = require('node-zookeeper-client');
