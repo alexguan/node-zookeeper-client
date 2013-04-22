@@ -3,6 +3,39 @@
 A pure Javascript [ZooKeeper](http://zookeeper.apache.org) client module for
 [Node.js](http://nodejs.org).
 
++ [Installation](#installation)
++ [Quick Examples](#quick-examples)
++ [Documentation](#documentation)
+  + [createClient](#client-createclientconnectionstring-options)
+  + [Client](#client)
+    + [connect](#void-connect)
+    + [close](#void-close)
+    + [create](#void-createpath-data-acls-mode-callback)
+    + [remove](#void-removepath-version-callback)
+    + [exists](#void-existspath-watcher-callback)
+    + [getChildren](#void-getchildrenpath-watcher-callback)
+    + [getData](#void-getdatapath-watcher-callback)
+    + [setData](#void-setdatapath-data-version-callback)
+    + [getACL](#void-getaclpath-callback)
+    + [setACL](#void-setaclpath-acls-version-callback)
+    + [transaction](#transaction-transaction)
+    + [mkdirp](#void-mkdirppath-data-acls-mode-callback)
+    + [addAuthInfo](#void-addauthinfoscheme-auth)
+    + [getState](#state-getstate)
+    + [getSessionId](#buffer-getsessionid)
+    + [getSessionPassword](#buffer-getsessionpassword)
+    + [getSessionTimeout](#number-getsessiontimeout)
+  + [Event](#event)
+  + [Transaction](#transaction)
+    + [create](#transaction-createpath-data-acls-mode)
+    + [setData](#transaction-setdata-path-data-version)
+    + [check](#transaction-checkpath-version)
+    + [remove](#transaction-removepath-data-version)
+    + [commit](#void-commitcallback)
+  + [Exception](#exception)
++ [Dependency](#dependency)
++ [License](#license)
+
 ## Installation
 
 You can install it using npm:
@@ -617,6 +650,19 @@ Add a create operation with given path, data, acls and mode.
 * mode `CreateMode` -  The creation mode, optional, defaults to
   `CreateMode.PERSISTENT`
 
+---
+
+#### Transaction setData(path, data, [version])
+
+Add a set-data operation with the given path, data and optional version.
+
+**Argument**
+
+* path `String` - Path of the node.
+* data `Buffer` - The data buffer, or null.
+* version `Number` - The version of the node, optional, defaults to -1.
+
+---
 
 #### Transaction check(path, [version])
 
@@ -627,6 +673,8 @@ Add a check (existence) operation with given path and optional version.
 * path `String` - Path of the node.
 * version `Number` - The version of the node, optional, defaults to -1.
 
+---
+
 #### Transaction remove(path, data, version)
  
 Add a delete operation with the given path and optional version.
@@ -635,6 +683,8 @@ Add a delete operation with the given path and optional version.
 
 * path `String` - Path of the node.
 * version `Number` - The version of the node, optional, defaults to -1.
+
+---
 
 #### void commit(callback)
 
