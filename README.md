@@ -641,7 +641,7 @@ client.connect();
 
 Add a create operation with given path, data, acls and mode.
 
-**Argument**
+**Arguments**
 
 * path `String` - Path of the node.
 * data `Buffer` - The data buffer, optional, defaults to null.
@@ -656,7 +656,7 @@ Add a create operation with given path, data, acls and mode.
 
 Add a set-data operation with the given path, data and optional version.
 
-**Argument**
+**Arguments**
 
 * path `String` - Path of the node.
 * data `Buffer` - The data buffer, or null.
@@ -668,7 +668,7 @@ Add a set-data operation with the given path, data and optional version.
 
 Add a check (existence) operation with given path and optional version.
 
-**Argument**
+**Arguments**
 
 * path `String` - Path of the node.
 * version `Number` - The version of the node, optional, defaults to -1.
