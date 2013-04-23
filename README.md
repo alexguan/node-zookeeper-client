@@ -711,6 +711,76 @@ Execute the transaction atomically.
 
 ### Exception
 
+If the requested operation fails due to reason related to ZooKeeper, the error
+which is passed into callback function will be an instance of `Exception` class.
+
+#### Number getCode()
+
+Return the error code of the exception. The following is the list of error codes
+exported through `Exception` class.
+
+* `Exception.OK`
+* `Exception.SYSTEM_ERROR`
+* `Exception.RUNTIME_INCONSISTENCY`
+* `Exception.DATA_INCONSISTENCY`
+* `Exception.CONNECTION_LOSS`
+* `Exception.MARSHALLING_ERROR`
+* `Exception.UNIMPLEMENTED`
+* `Exception.OPERATION_TIMEOUT`
+* `Exception.BAD_ARGUMENTS`
+* `Exception.API_ERROR`
+* `Exception.NO_NODE`
+* `Exception.NO_AUTH`
+* `Exception.BAD_VERSION`
+* `Exception.NO_CHILDREN_FOR_EPHEMERALS`
+* `Exception.NODE_EXISTS`
+* `Exception.NOT_EMPTY`
+* `Exception.SESSION_EXPIRED`
+* `Exception.INVALID_CALLBACK`
+* `Exception.INVALID_ACL`
+* `Exception.AUTH_FAILED`
+
+**Example**
+
+```javascript
+zookeeper.create('/test/demo', function (error, path) {
+        if (error) {
+            if (error.getCode() == zookeeper.Exception.NODE_EXISTS) {
+                console.log('Node exists.');
+            } else {
+                console.log(error.stack);
+            }
+
+            return;
+        }
+
+        console.log('Node: %s is created.', path);
+    }
+);
+```
+
+---
+
+#### String getPath()
+
+Return the associated node path of the exception. The path can be `undefined`
+if the exception is not related to node.
+
+--
+
+#### String getName()
+
+Return the exception name as defined in aforementioned list.
+
+---
+
+### String toString()
+
+Return the exception in a readable string.
+
+---
+
+
 ## Dependency
 
 This module depends on the following third-party libraries:
