@@ -3,6 +3,9 @@
 A pure Javascript [ZooKeeper](http://zookeeper.apache.org) client module for
 [Node.js](http://nodejs.org).
 
+This module is designed to match the ZooKeeper Java client API as close as
+possible but with tweaks to follow Node.js best practices.
+
 + [Installation](#installation)
 + [Example](#example)
 + [Documentation](#documentation)
