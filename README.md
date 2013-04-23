@@ -7,7 +7,7 @@ This module is designed to be similar to the ZooKeeper Java client API but with
 tweaks to follow Node.js best practices. Developers who have been working with
 the Java client should be able to pick it up quickly.
 
-This module has been tested to work ZooKeeper version 3.4.*.
+This module has been tested to work with ZooKeeper version 3.4.*.
 
 + [Installation](#installation)
 + [Example](#example)
