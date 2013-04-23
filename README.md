@@ -41,6 +41,11 @@ This module has been tested to work with ZooKeeper version 3.4.*.
         + [remove](#transaction-removepath-data-version)
         + [commit](#void-commitcallback)
     + [Exception](#exception)
+        + [getCode](#number-getcode)
+        + [getPath](#string-getpath)
+        + [getName](#string-getname)
+        + [toString](#string-tostring)
+    + [Exception](#exception)
 + [Dependency](#dependency)
 + [License](#license)
 
@@ -708,16 +713,15 @@ Execute the transaction atomically.
 
 * callback(error, results) `Function` - The callback function.
 
+---
 
 ### Exception
 
 If the requested operation fails due to reason related to ZooKeeper, the error
 which is passed into callback function will be an instance of `Exception` class.
 
-#### Number getCode()
-
-Return the error code of the exception. The following is the list of error codes
-exported through `Exception` class.
+The exception can be identified through its error code, the following is the
+list of error codes that are exported through `Exception` class.
 
 * `Exception.OK`
 * `Exception.SYSTEM_ERROR`
@@ -758,6 +762,10 @@ zookeeper.create('/test/demo', function (error, path) {
     }
 );
 ```
+
+#### Number getCode()
+
+Return the error code of the exception. 
 
 ---
 
