@@ -593,14 +593,14 @@ var sessionTimeout = zookeeper.getSessionTimeout();
 There are two type of events will be emitted by the client: client state event
 and watcher event.
 
-The client state transition is depicted int the ZooKeeper programmer guide:
+The client state transition is depicted in the ZooKeeper programmer guide:
 ![state transition](http://zookeeper.apache.org/doc/r3.4.5/images/state_dia.jpg)
 
 There are two ways to watch the client state events. You can either register
 individual event listeners on the specific events (Node.js convention) or you
 can register one event listener for `state` event (Java client convention).
 
-#### Client State Events
+#### Client State Event
 
 * `connected` - Client is connected and ready.
 * `connectedReadOnly` - Client is connected to a readonly server.
