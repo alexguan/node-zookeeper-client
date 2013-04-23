@@ -206,7 +206,7 @@ be triggered.
 
 Create a node with given path, data, acls and mode.
 
-**Argument**
+**Arguments**
 
 * path `String` - Path of the node.
 * data `Buffer` - The data buffer, optional, defaults to null.
@@ -242,7 +242,7 @@ Delete a node with the given path and version. If version is provided and not
 equal to -1, the request will fail when the provided version does not match the
 server version.
 
-**Argument**
+**Arguments**
 
 * path `String` - Path of the node.
 * version `Number` - The version of the node, optional, defaults to -1.
@@ -483,7 +483,7 @@ var transaction = zookeeper.transaction();
 
 Create given path in a way similar to `mkdir -p`.
 
-**Argument**
+**Arguments**
 
 * path `String` - Path of the node.
 * data `Buffer` - The data buffer, optional, defaults to `null`.
@@ -512,7 +512,7 @@ zookeeper.mkdirp('/test/demo/1/2/3', function (error, path) {
 
 Add the specified scheme:auth information to this client.
 
-**Argument**
+**Arguments**
 
 * scheme `String` - The authentication scheme.
 * auth `Buffer` - The authentication data buffer.
