@@ -3,9 +3,9 @@
 A pure Javascript [ZooKeeper](http://zookeeper.apache.org) client module for
 [Node.js](http://nodejs.org).
 
-This module is designed to be similar to the ZooKeeper Java client API but with
-tweaks to follow Node.js best practices. Developers who have been working with
-the Java client should be able to pick it up quickly.
+This module is designed to resemble the ZooKeeper Java client API but with
+tweaks to follow the convention of Node.js modules. Developers that are familiar
+with the ZooKeeper Java client would be able to pick it up quickly.
 
 This module has been tested to work with ZooKeeper version 3.4.*.
 
