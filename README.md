@@ -9,6 +9,8 @@ with the ZooKeeper Java client would be able to pick it up quickly.
 
 This module has been tested to work with ZooKeeper version 3.4.*.
 
+---
+
 + [Installation](#installation)
 + [Example](#example)
 + [Documentation](#documentation)
