@@ -595,27 +595,31 @@ var sessionTimeout = zookeeper.getSessionTimeout();
 
 ### Event
 
-There are two type of events will be emitted by the client: client state event
-and watcher event.
+There are two type of events that will be emitted by the client: client state
+event and watcher event.
 
 The client state transition is depicted in the ZooKeeper programmer guide:
 ![state transition](http://zookeeper.apache.org/doc/r3.4.5/images/state_dia.jpg)
 
-There are two ways to watch the client state events. You can either register
-individual event listeners on the specific events (Node.js convention) or you
-can register one event listener for `state` event (Java client convention).
+There are two ways to watch the client state events:
 
-#### Client State Event
+* Register event listeners on the specific events that interest you (Node.js
+  convention). The following is the list of events that be be registered:
 
-* `connected` - Client is connected and ready.
-* `connectedReadOnly` - Client is connected to a readonly server.
-* `disconnected` - The connection between client and server is dropped.
-* `expired` - The client session is expired.
-* `authenticationFailed` - Failed to authenticate with the server.
-* `state` - Whenever client state is changed, this event will be emitted and
-  the listener will be invoked with an instance of `State`.
+  * `connected` - Client is connected and ready.
+  * `connectedReadOnly` - Client is connected to a readonly server.
+  * `disconnected` - The connection between client and server is dropped.
+  * `expired` - The client session is expired.
+  * `authenticationFailed` - Failed to authenticate with the server.
 
-For watcher event, client need to register the watcher function on specific
+  Note: some events (e.g. `connected` or `disconnected`) will be emitted more
+  than once during the client life cycle.
+
+* Register a event listener on the `state` event (Java client convention) to
+  listener to all state transistion events. The listener callback will be
+  invoked with an instance of the `Event` class.
+
+For watcher events, client need to register the watcher function on specific
 methods. There is no global watcher event listener support.
 
 
