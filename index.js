@@ -592,7 +592,7 @@ Client.prototype.exists = function (path, watcher, callback) {
     request = new jute.Request(header, payload);
 
     self.connectionManager.queue(request, function (error, response) {
-        if (error && error.code !== Exception.NO_NODE) {
+        if (error && error.getCode() !== Exception.NO_NODE) {
             callback(error);
             return;
         }
@@ -729,7 +729,7 @@ Client.prototype.mkdirp = function (path, data, acls, mode, callback) {
         currentPath = currentPath + '/' + node;
         self.create(currentPath, acls, mode, data, function (error, path) {
             // Skip node exist error.
-            if (error && error.code === Exception.NODE_EXISTS) {
+            if (error && error.getCode() === Exception.NODE_EXISTS) {
                 next(null);
                 return;
             }
