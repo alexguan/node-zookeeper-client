@@ -617,7 +617,7 @@ There are two ways to watch the client state events:
 
 * Register a event listener on the `state` event (Java client convention) to
   listener to all state transistion events. The listener callback will be
-  invoked with an instance of the `Event` class.
+  invoked with an instance of the `State` class.
 
 For watcher events, client needs to register the watcher function on specific
 methods. There is no global watcher support.
