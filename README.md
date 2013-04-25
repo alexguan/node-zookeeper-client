@@ -33,6 +33,7 @@ This module has been tested to work with ZooKeeper version 3.4.*.
         + [getSessionId](#buffer-getsessionid)
         + [getSessionPassword](#buffer-getsessionpassword)
         + [getSessionTimeout](#number-getsessiontimeout)
+    + [State](#state)
     + [Event](#event)
     + [Transaction](#transaction)
         + [create](#transaction-createpath-data-acls-mode)
@@ -593,35 +594,94 @@ var sessionTimeout = zookeeper.getSessionTimeout();
 
 ---
 
-### Event
+### State
 
-There are two type of events that will be emitted by the client: client state
-event and watcher event.
+After the `connect()` method is invoked, the ZooKeeper client starts its
+life cycle and transitions its state as described in the following diagram.
 
-The client state transition is depicted in the ZooKeeper programmer guide:
 ![state transition](http://zookeeper.apache.org/doc/r3.4.5/images/state_dia.jpg)
 
-There are two ways to watch the client state events:
+There are two ways to watch the client state changes:
 
-* Register event listeners on the specific events that interest you (Node.js
-  convention). The following is the list of events that be be registered:
+1\. **Node.js convention:** Register event listener on the specific event
+which interests you. The following is the list of events that can be watched:
 
-  * `connected` - Client is connected and ready.
-  * `connectedReadOnly` - Client is connected to a readonly server.
-  * `disconnected` - The connection between client and server is dropped.
-  * `expired` - The client session is expired.
-  * `authenticationFailed` - Failed to authenticate with the server.
+* `connected` - Client is connected and ready.
+* `connectedReadOnly` - Client is connected to a readonly server.
+* `disconnected` - The connection between client and server is dropped.
+* `expired` - The client session is expired.
+* `authenticationFailed` - Failed to authenticate with the server.
 
-  Note: some events (e.g. `connected` or `disconnected`) will be emitted more
-  than once during the client life cycle.
+Note: some events (e.g. `connected` or `disconnected`) maybe be emitted more
+than once during the client life cycle.
 
-* Register a event listener on the `state` event (Java client convention) to
-  listener to all state transistion events. The listener callback will be
-  invoked with an instance of the `State` class.
+**Example**
 
-For watcher events, client needs to register the watcher function on specific
-methods. There is no global watcher support.
+```javascript
+client.on('connected', function () {
+    console.log('Client state is changed to connected.');
+});
+```
 
+2\. **Java client convention:** Register a event listener on the `state` event
+to watch all state transition events. The listener callback will be
+invoked with an instance of the `State` class. The list of exported state
+instances are:
+
+* `State.CONNECTED` - Client is connected and ready.
+* `State.CONNECTED_READ_ONLY` - Client is connected to a readonly server.
+* `State.DISCONNECTED` - The connection between client and server is dropped.
+* `State.EXPIRED` - The client session is expired.
+* `State.AUTH_FAILED` - Failed to authenticate with the server.
+
+```javascript
+client.on('state', function (state) {
+    if (state === zookeeper.State.SYNC_CONNECTED) {
+        console.log('Client state is changed to connected.');
+    }
+});
+```
+
+---
+
+### Event
+
+Optionally, you can register watcher functions when calling
+[`exists`](#void-existspath-watcher-callback),
+[`getChildren`](#void-getchildrenpath-watcher-callback) and
+[`getData`](#void-getdatapath-watcher-callback) methods. The watcher function
+will be called with an instance of `Event`. 
+
+**Properties**
+
+There are four type of events are exposed as `Event` class properties.
+
+* `NODE_CREATED` - Watched node is created.
+* `NODE_DELETED` - watched node is deleted.
+* `NODE_DATA_CHANGED` - Data of watched node is changed.
+* `NODE_CHILDREN_CHANGED` - Children of watched node is changed.
+
+#### Number getType()
+
+Return the type of the event.
+
+#### String getName()
+
+Return the name of the event.
+
+---
+
+#### Number getPath()
+
+Return the path of the event.
+
+---
+
+#### String toString()
+
+Return a string representation of the event.
+
+---
 
 ### Transaction
 
