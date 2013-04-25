@@ -623,10 +623,10 @@ client.on('connected', function () {
 });
 ```
 
-2\. **Java client convention:** Register a event listener on the `state` event
-to watch all state transition events. The listener callback will be
-invoked with an instance of the `State` class. The list of exported state
-instances are:
+2\. **Java client convention:** Register one event listener on the `state` event
+to watch all state transitions. The listener callback will be called with an
+instance of the `State` class. The following is the list of exported state
+instances:
 
 * `State.CONNECTED` - Client is connected and ready.
 * `State.CONNECTED_READ_ONLY` - Client is connected to a readonly server.
@@ -661,9 +661,13 @@ There are four type of events are exposed as `Event` class properties.
 * `NODE_DATA_CHANGED` - Data of watched node is changed.
 * `NODE_CHILDREN_CHANGED` - Children of watched node is changed.
 
+---
+
 #### Number getType()
 
 Return the type of the event.
+
+---
 
 #### String getName()
 
