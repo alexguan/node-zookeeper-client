@@ -57,5 +57,15 @@ describe('Path', function () {
                 Path.validate('/../a');
             }).to.throw('relative path');
         });
+
+        it('should accept dot in the the path name', function () {
+            expect(function () {
+                Path.validate('/a.b');
+            }).to.not.throw('relative path');
+
+            expect(function () {
+                Path.validate('/a..b');
+            }).to.not.throw('relative path');
+        });
     });
 });
