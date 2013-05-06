@@ -244,6 +244,7 @@ Client.prototype.addAuthInfo = function (scheme, auth) {
  * @param callback {Function} The callback function.
  */
 Client.prototype.create = function (path, data, acls, mode, callback) {
+	var argumentsArray = Array.prototype.slice.call(arguments);
     assert(
         arguments.length >= 2 && arguments.length <= 5,
         'create needs at least the path and callback arguments.'
@@ -259,7 +260,7 @@ Client.prototype.create = function (path, data, acls, mode, callback) {
 
     acls = mode = data = undefined;
 
-    Array.prototype.slice.call(arguments).forEach(function (arg, i, args) {
+	argumentsArray.forEach(function (arg, i, args) {
         // Skip the first and the last arguments
         if (i === 0 || i === args.length - 1) {
             return;
@@ -677,6 +678,7 @@ Client.prototype.getChildren = function (path, watcher, callback) {
  * @param callback {Function} The callback function.
  */
 Client.prototype.mkdirp = function (path, data, acls, mode, callback) {
+	var argumentsArray = Array.prototype.slice.call(arguments);
     assert(
         arguments.length >= 2 && arguments.length <= 5,
         'mkdirp needs at least the path and callback arguments.'
@@ -692,7 +694,7 @@ Client.prototype.mkdirp = function (path, data, acls, mode, callback) {
 
     data = acls = mode = undefined;
 
-    Array.prototype.slice.call(arguments).forEach(function (arg, i, args) {
+	argumentsArray.forEach(function (arg, i, args) {
         // Skip the first and the last arguments
         if (i === 0 || i === (args.length - 1)) {
             return;
