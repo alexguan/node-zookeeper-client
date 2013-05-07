@@ -244,46 +244,40 @@ Client.prototype.addAuthInfo = function (scheme, auth) {
  * @param callback {Function} The callback function.
  */
 Client.prototype.create = function (path, data, acls, mode, callback) {
-    assert(
-        arguments.length >= 2 && arguments.length <= 5,
-        'create needs at least the path and callback arguments.'
-    );
+    var optionalArgs = [data, acls, mode, callback],
+        header,
+        payload,
+        request;
 
     Path.validate(path);
-    callback = arguments[arguments.length - 1];
 
-    assert(
-        typeof callback === 'function',
-        'callback must be a function.'
-    );
-
-    acls = mode = data = undefined;
-
-    Array.prototype.slice.call(arguments).forEach(function (arg, i, args) {
-        // Skip the first and the last arguments
-        if (i === 0 || i === args.length - 1) {
-            return;
-        }
-
+    // Reset arguments so we can reassign correct value to them.
+    data = acls = mode = callback = undefined;
+    optionalArgs.forEach(function (arg, index) {
         if (Array.isArray(arg)) {
             acls = arg;
         } else if (typeof arg === 'number') {
             mode = arg;
         } else if (Buffer.isBuffer(arg)) {
             data = arg;
+        } else if (typeof arg === 'function') {
+            callback = arg;
         }
     });
 
+    assert(
+        typeof callback === 'function',
+        'callback must be a function.'
+    );
 
-    acls = acls || ACL.OPEN_ACL_UNSAFE;
+    acls = Array.isArray(acls) ? acls : ACL.OPEN_ACL_UNSAFE;
     mode = typeof mode === 'number' ? mode : CreateMode.PERSISTENT;
-
-    assert(acls.length > 0, 'acls must be a non-empty array.');
 
     assert(
         data === null || data === undefined || Buffer.isBuffer(data),
         'data must be a valid buffer, null or undefined.'
     );
+
     if (Buffer.isBuffer(data)) {
         assert(
             data.length <= DATA_SIZE_LIMIT,
@@ -291,12 +285,12 @@ Client.prototype.create = function (path, data, acls, mode, callback) {
         );
     }
 
-    var header = new jute.protocol.RequestHeader(),
-        payload = new jute.protocol.CreateRequest(),
-        request;
+    assert(acls.length > 0, 'acls must be a non-empty array.');
 
+    header = new jute.protocol.RequestHeader();
     header.type = jute.OP_CODES.CREATE;
 
+    payload = new jute.protocol.CreateRequest();
     payload.path = path;
     payload.acl = acls.map(function (item) {
         return item.toRecord();
@@ -309,7 +303,6 @@ Client.prototype.create = function (path, data, acls, mode, callback) {
     }
 
     request = new jute.Request(header, payload);
-
     this.connectionManager.queue(request, function (error, response) {
         if (error) {
             callback(error);
@@ -677,46 +670,40 @@ Client.prototype.getChildren = function (path, watcher, callback) {
  * @param callback {Function} The callback function.
  */
 Client.prototype.mkdirp = function (path, data, acls, mode, callback) {
-    assert(
-        arguments.length >= 2 && arguments.length <= 5,
-        'mkdirp needs at least the path and callback arguments.'
-    );
+    var optionalArgs = [data, acls, mode, callback],
+        self = this,
+        currentPath = '',
+        nodes;
 
     Path.validate(path);
-    callback = arguments[arguments.length - 1];
 
-    assert(
-        typeof callback === 'function',
-        'callback must be a function.'
-    );
-
-    data = acls = mode = undefined;
-
-    Array.prototype.slice.call(arguments).forEach(function (arg, i, args) {
-        // Skip the first and the last arguments
-        if (i === 0 || i === (args.length - 1)) {
-            return;
-        }
-
+    // Reset arguments so we can reassign correct value to them.
+    data = acls = mode = callback = undefined;
+    optionalArgs.forEach(function (arg, index) {
         if (Array.isArray(arg)) {
             acls = arg;
         } else if (typeof arg === 'number') {
             mode = arg;
         } else if (Buffer.isBuffer(arg)) {
             data = arg;
+        } else if (typeof arg === 'function') {
+            callback = arg;
         }
     });
 
+    assert(
+        typeof callback === 'function',
+        'callback must be a function.'
+    );
 
-    acls = acls || ACL.OPEN_ACL_UNSAFE;
+    acls = Array.isArray(acls) ? acls : ACL.OPEN_ACL_UNSAFE;
     mode = typeof mode === 'number' ? mode : CreateMode.PERSISTENT;
-
-    assert(acls.length > 0, 'acls must be a non-empty array.');
 
     assert(
         data === null || data === undefined || Buffer.isBuffer(data),
         'data must be a valid buffer, null or undefined.'
     );
+
     if (Buffer.isBuffer(data)) {
         assert(
             data.length <= DATA_SIZE_LIMIT,
@@ -724,13 +711,14 @@ Client.prototype.mkdirp = function (path, data, acls, mode, callback) {
         );
     }
 
-    var self = this,
-        nodes = path.split('/').slice(1), // Remove the empty string
-        currentPath = '';
+    assert(acls.length > 0, 'acls must be a non-empty array.');
+
+    // Remove the empty string
+    nodes = path.split('/').slice(1);
 
     async.eachSeries(nodes, function (node, next) {
         currentPath = currentPath + '/' + node;
-        self.create(currentPath, acls, mode, data, function (error, path) {
+        self.create(currentPath, data, acls, mode, function (error, path) {
             // Skip node exist error.
             if (error && error.getCode() === Exception.NODE_EXISTS) {
                 next(null);

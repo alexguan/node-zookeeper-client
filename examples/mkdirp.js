@@ -13,7 +13,7 @@ var path = process.argv[3];
 client.once('connected', function () {
     console.log('Connected to the server.');
 
-    client.mkdirp(path, function (error, p) {
+    client.mkdirp(path, zookeeper.CreateMode.PERSISTENT, function (error, p) {
         if (error) {
             console.log('Failed to mkdirp: %s due to: %s: ', path, error.stack);
         } else {

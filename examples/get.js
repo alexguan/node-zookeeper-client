@@ -26,7 +26,7 @@ function getData(client, path) {
             console.log(
                 'Node: %s has data: %s, version: %d',
                 path,
-                data.toString(),
+                data ? data.toString() : undefined,
                 stat.version
             );
         }
