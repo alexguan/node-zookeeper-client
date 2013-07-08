@@ -7,7 +7,7 @@
 
 var zookeeper = require('../index.js');
 
-var client = zookeeper.createClient(process.argv[2]);
+var client = zookeeper.createClient(process.argv[2], { retries : 2 });
 var path = process.argv[3];
 var data = new Buffer(process.argv[4]);
 
@@ -26,6 +26,7 @@ client.once('connected', function () {
             path,
             stat.version
         );
+        client.close();
     });
 });
 

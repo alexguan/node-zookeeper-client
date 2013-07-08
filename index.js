@@ -37,7 +37,8 @@ var ConnectionManager = require('./lib/ConnectionManager.js');
 // Constants.
 var CLIENT_DEFAULT_OPTIONS = {
     sessionTimeout : 30000, // Default to 30 seconds.
-    spinDelay : 1000 // 1 second
+    spinDelay : 1000, // Defaults to 1 second.
+    retries : 0 // Defaults to 0, no retry.
 };
 
 var DATA_SIZE_LIMIT = 1048576; // 1 mega bytes.
@@ -65,6 +66,106 @@ function defaultStateListener(state) {
     default:
         return;
     }
+}
+
+/**
+ * Try to execute the given function 'fn'. If it fails to execute, retry for
+ * 'self.options.retires' times. The duration between each retry starts at
+ * 1000ms and grows exponentially as:
+ *
+ * duration = Math.min(1000 * Math.pow(2, attempts), sessionTimeout)
+ *
+ * When the given function is executed successfully or max retry has been
+ * reached, an optional callback function will be invoked with the error (if
+ * any) and the result.
+ *
+ * fn prototype:
+ * function(attempts, next);
+ * attempts: tells you what is the current execution attempts. It starts with 0.
+ * next: You invoke the next function when complete or there is an error.
+ *
+ * next prototype:
+ * function(error, ...);
+ * error: The error you encounter in the operation.
+ * other arguments: Will be passed to the optional callback
+ *
+ * callback prototype:
+ * function(error, ...)
+ *
+ * @private
+ * @method attempt
+ * @param self {Client} an instance of zookeeper client.
+ * @param fn {Function} the function to execute.
+ * @param callback {Function} optional callback function.
+ *
+ */
+function attempt(self, fn, callback) {
+    var count = 0,
+        retry = true,
+        retries = self.options.retries,
+        results = {};
+
+    assert(typeof fn === 'function', 'fn must be a function.');
+
+    assert(
+        typeof retries === 'number' && retries >= 0,
+        'retries must be an integer greater or equal to 0.'
+    );
+
+    assert(typeof callback === 'function', 'callback must be a function.');
+
+    async.whilst(
+        function () {
+            return count <= retries && retry;
+        },
+        function (next) {
+            var attempts = count;
+            count += 1;
+
+            fn(attempts, function (error) {
+                var args,
+                    sessionTimeout;
+
+                results[attempts] = {};
+                results[attempts].error = error;
+
+                if (arguments.length > 1) {
+                    args = Array.prototype.slice.apply(arguments);
+                    results[attempts].args = args.slice(1);
+                }
+
+                if (error && error.code === Exception.CONNECTION_LOSS) {
+                    retry = true;
+                } else {
+                    retry = false;
+                }
+
+                if (!retry || count > retries) {
+                    // call next so we can get out the loop without delay
+                    next();
+                } else {
+                    sessionTimeout = self.connectionManager.getSessionTimeout();
+
+                    // Exponentially back-off
+                    setTimeout(
+                        next,
+                        Math.min(1000 * Math.pow(2, attempts), sessionTimeout)
+                    );
+                }
+            });
+        },
+        function (error) {
+            var args = [],
+                result = results[count - 1];
+
+            if (callback) {
+                args.push(result.error);
+                Array.prototype.push.apply(args, result.args);
+
+                callback.apply(null, args);
+            }
+        }
+    );
 }
 
 /**
@@ -244,7 +345,8 @@ Client.prototype.addAuthInfo = function (scheme, auth) {
  * @param callback {Function} The callback function.
  */
 Client.prototype.create = function (path, data, acls, mode, callback) {
-    var optionalArgs = [data, acls, mode, callback],
+    var self = this,
+        optionalArgs = [data, acls, mode, callback],
         header,
         payload,
         request;
@@ -303,14 +405,21 @@ Client.prototype.create = function (path, data, acls, mode, callback) {
     }
 
     request = new jute.Request(header, payload);
-    this.connectionManager.queue(request, function (error, response) {
-        if (error) {
-            callback(error);
-            return;
-        }
 
-        callback(null, response.payload.path);
-    });
+    attempt(
+        self,
+        function (attempts, next) {
+            self.connectionManager.queue(request, function (error, response) {
+                if (error) {
+                    next(error);
+                    return;
+                }
+
+                next(null, response.payload.path);
+            });
+        },
+        callback
+    );
 };
 
 /**
@@ -334,7 +443,8 @@ Client.prototype.remove = function (path, version, callback) {
     assert(typeof version === 'number', 'version must be a number.');
 
 
-    var header = new jute.protocol.RequestHeader(),
+    var self = this,
+        header = new jute.protocol.RequestHeader(),
         payload = new jute.protocol.DeleteRequest(),
         request;
 
@@ -345,14 +455,15 @@ Client.prototype.remove = function (path, version, callback) {
 
     request = new jute.Request(header, payload);
 
-    this.connectionManager.queue(request, function (error, response) {
-        if (error) {
-            callback(error);
-            return;
-        }
-
-        callback(null);
-    });
+    attempt(
+        self,
+        function (attempts, next) {
+            self.connectionManager.queue(request, function (error, response) {
+                next(error);
+            });
+        },
+        callback
+    );
 };
 
 /**
@@ -388,7 +499,8 @@ Client.prototype.setData = function (path, data, version, callback) {
         );
     }
 
-    var header = new jute.protocol.RequestHeader(),
+    var self = this,
+        header = new jute.protocol.RequestHeader(),
         payload = new jute.protocol.SetDataRequest(),
         request;
 
@@ -401,14 +513,20 @@ Client.prototype.setData = function (path, data, version, callback) {
 
     request = new jute.Request(header, payload);
 
-    this.connectionManager.queue(request, function (error, response) {
-        if (error) {
-            callback(error);
-            return;
-        }
+    attempt(
+        self,
+        function (attempts, next) {
+            self.connectionManager.queue(request, function (error, response) {
+                if (error) {
+                    next(error);
+                    return;
+                }
 
-        callback(null, response.payload.stat);
-    });
+                next(null, response.payload.stat);
+            });
+        },
+        callback
+    );
 };
 
 /**
@@ -448,18 +566,24 @@ Client.prototype.getData = function (path, watcher, callback) {
 
     request = new jute.Request(header, payload);
 
-    self.connectionManager.queue(request, function (error, response) {
-        if (error) {
-            callback(error);
-            return;
-        }
+    attempt(
+        self,
+        function (attempts, next) {
+            self.connectionManager.queue(request, function (error, response) {
+                if (error) {
+                    next(error);
+                    return;
+                }
 
-        if (watcher) {
-            self.connectionManager.registerDataWatcher(path, watcher);
-        }
+                if (watcher) {
+                    self.connectionManager.registerDataWatcher(path, watcher);
+                }
 
-        callback(null, response.payload.data, response.payload.stat);
-    });
+                next(null, response.payload.data, response.payload.stat);
+            });
+        },
+        callback
+    );
 };
 
 /**
@@ -488,7 +612,8 @@ Client.prototype.setACL = function (path, acls, version, callback) {
     );
     assert(typeof version === 'number', 'version must be a number.');
 
-    var header = new jute.protocol.RequestHeader(),
+    var self = this,
+        header = new jute.protocol.RequestHeader(),
         payload = new jute.protocol.SetACLRequest(),
         request;
 
@@ -503,14 +628,20 @@ Client.prototype.setACL = function (path, acls, version, callback) {
 
     request = new jute.Request(header, payload);
 
-    this.connectionManager.queue(request, function (error, response) {
-        if (error) {
-            callback(error);
-            return;
-        }
+    attempt(
+        self,
+        function (attempts, next) {
+            self.connectionManager.queue(request, function (error, response) {
+                if (error) {
+                    next(error);
+                    return;
+                }
 
-        callback(null, response.payload.stat);
-    });
+                next(null, response.payload.stat);
+            });
+        },
+        callback
+    );
 };
 
 /**
@@ -534,22 +665,28 @@ Client.prototype.getACL = function (path, callback) {
     payload.path = path;
     request = new jute.Request(header, payload);
 
-    self.connectionManager.queue(request, function (error, response) {
-        if (error) {
-            callback(error);
-            return;
-        }
+    attempt(
+        self,
+        function (attempts, next) {
+            self.connectionManager.queue(request, function (error, response) {
+                if (error) {
+                    next(error);
+                    return;
+                }
 
-        var acls;
+                var acls;
 
-        if (Array.isArray(response.payload.acl)) {
-            acls = response.payload.acl.map(function (item) {
-                return ACL.fromRecord(item);
+                if (Array.isArray(response.payload.acl)) {
+                    acls = response.payload.acl.map(function (item) {
+                        return ACL.fromRecord(item);
+                    });
+                }
+
+                next(null, acls, response.payload.stat);
             });
-        }
-
-        callback(null, acls, response.payload.stat);
-    });
+        },
+        callback
+    );
 };
 
 /**
@@ -587,27 +724,39 @@ Client.prototype.exists = function (path, watcher, callback) {
 
     request = new jute.Request(header, payload);
 
-    self.connectionManager.queue(request, function (error, response) {
-        if (error && error.getCode() !== Exception.NO_NODE) {
-            callback(error);
-            return;
-        }
+    attempt(
+        self,
+        function (attempts, next) {
+            self.connectionManager.queue(request, function (error, response) {
+                if (error && error.getCode() !== Exception.NO_NODE) {
+                    next(error);
+                    return;
+                }
 
-        var existence = response.header.err === Exception.OK;
+                var existence = response.header.err === Exception.OK;
 
-        if (watcher) {
-            if (existence) {
-                self.connectionManager.registerDataWatcher(path, watcher);
-            } else {
-                self.connectionManager.registerExistenceWatcher(path, watcher);
-            }
-        }
+                if (watcher) {
+                    if (existence) {
+                        self.connectionManager.registerDataWatcher(
+                            path,
+                            watcher
+                        );
+                    } else {
+                        self.connectionManager.registerExistenceWatcher(
+                            path,
+                            watcher
+                        );
+                    }
+                }
 
-        callback(
-            null,
-            existence ? response.payload.stat : null
-        );
-    });
+                next(
+                    null,
+                    existence ? response.payload.stat : null
+                );
+            });
+        },
+        callback
+    );
 };
 
 /**
@@ -644,18 +793,24 @@ Client.prototype.getChildren = function (path, watcher, callback) {
 
     request = new jute.Request(header, payload);
 
-    self.connectionManager.queue(request, function (error, response) {
-        if (error) {
-            callback(error);
-            return;
-        }
+    attempt(
+        self,
+        function (attempts, next) {
+            self.connectionManager.queue(request, function (error, response) {
+                if (error) {
+                    next(error);
+                    return;
+                }
 
-        if (watcher) {
-            self.connectionManager.registerChildWatcher(path, watcher);
-        }
+                if (watcher) {
+                    self.connectionManager.registerChildWatcher(path, watcher);
+                }
 
-        callback(null, response.payload.children, response.payload.stat);
-    });
+                next(null, response.payload.children, response.payload.stat);
+            });
+        },
+        callback
+    );
 };
 
 /**
