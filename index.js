@@ -252,6 +252,9 @@ Client.prototype.onConnectionManagerState = function (connectionManagerState) {
     case ConnectionManager.STATES.AUTHENTICATION_FAILED:
         state = State.AUTH_FAILED;
         break;
+    case ConnectionManager.STATES.CLOSED:
+        this.emit('closed');
+        return;
     default:
         // Not a event in which client is interested, so skip it.
         return;
