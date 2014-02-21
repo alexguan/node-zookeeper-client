@@ -159,7 +159,8 @@ Factory method to create a new zookeeper [client](#client) instance.
     {
         sessionTimeout: 30000,
         spinDelay : 1000,
-        retries : 0
+        retries : 0,
+        requestTimeout : null
     }
     ```
 
