@@ -18,6 +18,8 @@ describe('ConnectionStringParser', function () {
                 to.throw('non-empty string');
             expect(function () { return new ConnectionStringParser(''); }).
                 to.throw('non-empty string');
+            expect(function () { return new ConnectionStringParser('   '); }).
+                to.throw('non-empty string');
         });
 
         it('should reject invalid chroot path', function () {
@@ -39,6 +41,13 @@ describe('ConnectionStringParser', function () {
                 parser = new ConnectionStringParser(s);
 
             expect(parser.getConnectionString()).to.equal(s);
+        });
+
+        it('should diregard white spaces', function () {
+            var s = '  localhost  :  2181  ',
+                parser = new ConnectionStringParser(s);
+
+            expect(parser.getConnectionString()).to.equal("localhost:2181");
         });
     });
 
@@ -75,7 +84,20 @@ describe('ConnectionStringParser', function () {
             expect(servers).to.have.deep.property('[0].port').match(/218[12]/);
             expect(servers).to.have.deep.property('[1].host', 'localhost');
             expect(servers).to.have.deep.property('[1].port').match(/218[12]/);
+        });
 
+        it('should return an array of host:port objects diregarding white spaces', function () {
+            var s = ', localhost : 2181,  localhost , localhost:, ,  ',
+                parser = new ConnectionStringParser(s),
+                servers = parser.getServers();
+
+            expect(servers).to.be.instanceof(Array).that.have.length(3);
+            expect(servers).to.have.deep.property('[0].host', 'localhost');
+            expect(servers).to.have.deep.property('[0].port').match(/218[12]/);
+            expect(servers).to.have.deep.property('[1].host', 'localhost');
+            expect(servers).to.have.deep.property('[1].port').match(/218[12]/);
+            expect(servers).to.have.deep.property('[2].host', 'localhost');
+            expect(servers).to.have.deep.property('[2].port').match(/218[12]/);
         });
 
         it('should add default port if port is not provided', function () {
