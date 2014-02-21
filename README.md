@@ -151,6 +151,7 @@ Factory method to create a new zookeeper [client](#client) instance.
     * `sessionTimeout` Session timeout in milliseconds, defaults to 30 seconds.
     * `spinDelay` The delay (in milliseconds) between each connection attempts.
     * `retries` The number of retry attempts for connection loss exception.
+    * `connectionRetries` The number of retry attempts to connect to ZooKeeper (intial connection + connection loss), defaults to -1 in which the client will try to connect indefinetly.
 
   Defaults options:
 
@@ -158,7 +159,8 @@ Factory method to create a new zookeeper [client](#client) instance.
     {
         sessionTimeout: 30000,
         spinDelay : 1000,
-        retries : 0
+        retries : 0,
+        connectionRetries : -1
     }
     ```
 
@@ -637,6 +639,7 @@ instances:
 * `State.DISCONNECTED` - The connection between client and server is dropped.
 * `State.EXPIRED` - The client session is expired.
 * `State.AUTH_FAILED` - Failed to authenticate with the server.
+* `State.CONNECT_TIMEOUT` - Timeout trying to connect to server.
 
 ```javascript
 client.on('state', function (state) {

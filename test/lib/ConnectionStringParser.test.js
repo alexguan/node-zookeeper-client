@@ -47,7 +47,7 @@ describe('ConnectionStringParser', function () {
             var s = '  localhost  :  2181  ',
                 parser = new ConnectionStringParser(s);
 
-            expect(parser.getConnectionString()).to.equal("localhost:2181");
+            expect(parser.getConnectionString()).to.equal('localhost:2181');
         });
     });
 
