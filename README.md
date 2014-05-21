@@ -270,7 +270,7 @@ zookeeper.remove('/test/demo', -1, function (error) {
     }
 
     console.log('Node is deleted.');
-);
+});
 ```
 
 ---
@@ -307,7 +307,7 @@ zookeeper.exists('/test/demo', function (error, stat) {
     } else {
         console.log('Node does not exist.');
     }
-);
+});
 ```
 
 ---
@@ -341,7 +341,7 @@ zookeeper.getChildren('/test/demo', function (error, children, stats) {
     }
 
     console.log('Children are: %j.', children);
-);
+});
 ```
 
 #### void getData(path, [watcher], callback)
@@ -820,19 +820,17 @@ list of error codes that are exported through `Exception` class.
 
 ```javascript
 zookeeper.create('/test/demo', function (error, path) {
-        if (error) {
-            if (error.getCode() == zookeeper.Exception.NODE_EXISTS) {
-                console.log('Node exists.');
-            } else {
-                console.log(error.stack);
-            }
-
-            return;
+    if (error) {
+        if (error.getCode() == zookeeper.Exception.NODE_EXISTS) {
+            console.log('Node exists.');
+        } else {
+            console.log(error.stack);
         }
-
-        console.log('Node: %s is created.', path);
+        return;
     }
-);
+
+    console.log('Node: %s is created.', path);
+});
 ```
 
 #### Number getCode()
