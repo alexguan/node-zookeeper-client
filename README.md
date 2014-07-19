@@ -544,7 +544,8 @@ Return the current client [state](#state).
 **Example**
 
 ```javascript
-var state = zookeeper.getState();
+var client = zookeeper.createClient({...});
+var state = client.getState();
 console.log('Current state is: %s', state);
 ```
 
@@ -562,7 +563,8 @@ long integer natively.
 **Example**
 
 ```javascript
-var id = zookeeper.getSessionId();
+var client = zookeeper.createClient({...});
+var id = client.getSessionId();
 console.log('Session id is: %s', id.toString('hex'));
 ```
 
@@ -579,7 +581,8 @@ The value returned is an instance of
 **Example**
 
 ```javascript
-var pwd = zookeeper.getSessionPassword();
+var client = zookeeper.createClient({...});
+var pwd = client.getSessionPassword();
 ```
 
 ---
@@ -593,7 +596,8 @@ and may change after a re-connect.
 **Example**
 
 ```javascript
-var sessionTimeout = zookeeper.getSessionTimeout();
+var client = zookeeper.createClient({...});
+var sessionTimeout = client.getSessionTimeout();
 ```
 
 ---
