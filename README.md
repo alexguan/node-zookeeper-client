@@ -532,7 +532,7 @@ Add the specified scheme:auth information to this client.
 **Example**
 
 ```javascript
-zookeeper.setAuthInfo('ip', new Buffer('127.0.0.1');
+zookeeper.addAuthInfo('ip', new Buffer('127.0.0.1');
 ```
 
 ---
