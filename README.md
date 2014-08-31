@@ -153,6 +153,7 @@ Factory method to create a new zookeeper [client](#client) instance.
     * `sessionTimeout` Session timeout in milliseconds, defaults to 30 seconds.
     * `spinDelay` The delay (in milliseconds) between each connection attempts.
     * `retries` The number of retry attempts for connection loss exception.
+    * `requestTimeout` The request timeout in millseconds to wait for a response from the ZooKeeper host before causing a `REQUEST_TIMED_OUT` error to be delivered to the request callback and the connection being retried. If `false` then there will be no request timeout performed. If `null` then it will default to twice the `pingTimeout` which is calculated as 1/3 of the negotiated `sessionTimeout`.  
 
   Defaults options:
 
@@ -160,7 +161,8 @@ Factory method to create a new zookeeper [client](#client) instance.
     {
         sessionTimeout: 30000,
         spinDelay : 1000,
-        retries : 0
+        retries : 0,
+        requestTimeout : false
     }
     ```
 
