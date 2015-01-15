@@ -423,6 +423,42 @@ Client.prototype.create = function (path, data, acls, mode, callback) {
 };
 
 /**
+ * Synchronize this client's view of the given path with the
+ * ZooKeeper leader. From the callback, any read will see
+ * data at least as new as when this function was called.
+ *
+ * @method sync
+ * @param path {String} The node path.
+ * @param callback {Function} The callback function.
+ */
+Client.prototype.sync = function (path, callback) {
+    Path.validate(path);
+
+    assert(typeof callback === 'function', 'callback must be a function.');
+
+    var self = this,
+        header = new jute.protocol.RequestHeader(),
+        payload = new jute.protocol.SyncRequest(),
+        request;
+
+    header.type = jute.OP_CODES.SYNC;
+
+    payload.path = path;
+
+    request = new jute.Request(header, payload);
+
+    attempt(
+        self,
+        function (attempts, next) {
+            self.connectionManager.queue(request, function (error, response) {
+                next(error);
+            });
+        },
+        callback
+    );
+};
+
+/**
  * Delete a node with the given path. If version is not -1, the request will
  * fail when the provided version does not match the server version.
  *

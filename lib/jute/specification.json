@@ -94,6 +94,12 @@
             { "name" : "data", "type" : "buffer" },
             { "name" : "stat", "type" : "data.Stat" }
         ],
+        "SyncRequest" : [
+            { "name" : "path", "type" : "ustring" }
+        ],
+        "SyncResponse" : [
+            { "name" : "path", "type" : "ustring" }
+        ],
         "GetACLRequest" : [
             { "name" : "path", "type" : "ustring" }
         ],

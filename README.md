@@ -413,6 +413,46 @@ zookeeper.setData('/test/demo', null, 2, function (error, stat) {
 
 ---
 
+#### void sync(path, callback)
+
+Synchronize the client's view of the given path with the ZooKeeper leader.
+
+It is possible for a client to read a stale value for a given path, even
+after another client has received confirmation that the new value has been
+committed. Only a quorum of servers has to agree to a given change for a
+write to be confirmed, and we might be connected to a server that hasn't
+seen the update yet.
+
+The callback function will be called once we confirm that any read of the
+given path will return a value at least as new as when sync() was called.
+
+**Arguments**
+
+* path `String` - Path of the node.
+* callback(error) `Function` - The callback function.
+
+**Example**
+
+```javascript
+zookeeper.sync('/test/demo', function (error) {
+    if (error) {
+        console.log(error.stack);
+        return;
+    }
+
+    zookeeper.getData('/test/demo', function (error, data, stat) {
+        if (error) {
+            console.log(error.stack);
+            return;
+        }
+
+        console.log('Fresh value read.');
+    });
+});
+```
+
+---
+
 #### void getACL(path, callback)
 
 Retrieve the list of [ACL](#acl) and stat of the node of the given path.
