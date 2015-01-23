@@ -20,6 +20,7 @@ describe('State', function () {
             expect(State.CONNECTED_READ_ONLY).to.exist;
             expect(State.SASL_AUTHENTICATED).to.exist;
             expect(State.EXPIRED).to.exist;
+            expect(State.CONNECT_TIMEOUT).to.exist;
         });
     });
 });

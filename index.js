@@ -38,7 +38,8 @@ var ConnectionManager = require('./lib/ConnectionManager.js');
 var CLIENT_DEFAULT_OPTIONS = {
     sessionTimeout : 30000, // Default to 30 seconds.
     spinDelay : 1000, // Defaults to 1 second.
-    retries : 0 // Defaults to 0, no retry.
+    retries : 0, // Defaults to 0, no retry.
+    connectionRetries : -1 // Defaults to -1, retry indefinetly.
 };
 
 var DATA_SIZE_LIMIT = 1048576; // 1 mega bytes.
@@ -251,6 +252,9 @@ Client.prototype.onConnectionManagerState = function (connectionManagerState) {
         break;
     case ConnectionManager.STATES.AUTHENTICATION_FAILED:
         state = State.AUTH_FAILED;
+        break;
+    case ConnectionManager.STATES.CONNECT_TIMEOUT:
+        state = State.CONNECT_TIMEOUT;
         break;
     default:
         // Not a event in which client is interested, so skip it.
