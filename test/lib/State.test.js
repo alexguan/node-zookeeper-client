@@ -22,5 +22,20 @@ describe('State', function () {
             expect(State.EXPIRED).to.exist;
         });
     });
+
+    it('gets the sate name', function () {
+        expect(State.DISCONNECTED.getName()).to.equal('DISCONNECTED');
+    });
+
+    it('gets the sate code', function () {
+        expect(State.DISCONNECTED.getCode()).to.equal(0);
+    });
+
+    it('represents the state as a string', function () {
+        var state = State.DISCONNECTED;
+        var expectedString = state.getName() + '[' + state.getCode() + ']';
+
+        expect(String(State.DISCONNECTED)).to.equal(expectedString);
+    });
 });
 

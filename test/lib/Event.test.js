@@ -64,7 +64,7 @@ describe('Event', function () {
     });
 
     describe('toString', function () {
-        it('should return the correctly formatted string.', function () {
+        it('should return the correctly formatted string with a path.', function () {
             var e = Event.create({
                 type : Event.NODE_CREATED,
                 path : '/test'
@@ -72,6 +72,16 @@ describe('Event', function () {
 
             expect(e.toString()).to.equal(
                 'NODE_CREATED[' + Event.NODE_CREATED + ']@/test'
+            );
+        });
+
+        it('should return the correctly formatted string without a path.', function () {
+            var e = Event.create({
+                type : Event.NODE_CREATED
+            });
+
+            expect(e.toString()).to.equal(
+                'NODE_CREATED[' + Event.NODE_CREATED + ']'
             );
         });
     });

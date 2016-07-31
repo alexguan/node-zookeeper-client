@@ -70,5 +70,11 @@ describe('Path', function () {
                 Path.validate('/a..b');
             }).to.not.throw('relative path');
         });
+
+        it('should accept root path', function () {
+            expect(function () {
+                Path.validate('/');
+            }).to.not.throw('relative path');
+        });
     });
 });
