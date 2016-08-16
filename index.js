@@ -120,6 +120,7 @@ function attempt(self, fn, callback) {
         },
         function (next) {
             var attempts = count;
+
             count += 1;
 
             fn(attempts, function (error) {
@@ -873,7 +874,7 @@ Client.prototype.mkdirp = function (path, data, acls, mode, callback) {
 
     async.eachSeries(nodes, function (node, next) {
         currentPath = currentPath + '/' + node;
-        self.create(currentPath, data, acls, mode, function (error, path) {
+        self.create(currentPath, data, acls, mode, function (error) {
             // Skip node exist error.
             if (error && error.getCode() === Exception.NODE_EXISTS) {
                 next(null);
