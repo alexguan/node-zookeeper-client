@@ -153,6 +153,7 @@ Factory method to create a new zookeeper [client](#client) instance.
     * `sessionTimeout` Session timeout in milliseconds, defaults to 30 seconds.
     * `spinDelay` The delay (in milliseconds) between each connection attempts.
     * `retries` The number of retry attempts for connection loss exception.
+    * `automaticReconnect` Whether to reconnect to zookeeper after disconnection, defaults to true.
 
   Defaults options:
 
@@ -160,7 +161,8 @@ Factory method to create a new zookeeper [client](#client) instance.
     {
         sessionTimeout: 30000,
         spinDelay : 1000,
-        retries : 0
+        retries : 0,
+	automaticReconnect: true
     }
     ```
 
