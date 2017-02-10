@@ -12,6 +12,17 @@ var Exception = require('../../lib/Exception.js');
 
 
 describe('Exception', function () {
+    it('does not require path', function () {
+        var exception = new Exception(0, 'name', function(){});
+        expect(exception.path).to.be.undefined;
+    });
+
+    it('requires ctor to be a function', function () {
+        expect(function () {
+            new Exception(0, 'name', null);
+        }).to.throw('ctor must be a function.');
+    });
+
     describe('create', function () {
         it('should only accept number code', function () {
             expect(function () {
