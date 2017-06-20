@@ -69,6 +69,7 @@ $ npm install node-zookeeper-client
 ```javascript
 var zookeeper = require('node-zookeeper-client');
 
+// ipv6 : zookeeper.createClient('[2001:db8:65:6c61:622e:6b72:010:3214]:4322')
 var client = zookeeper.createClient('localhost:2181');
 var path = process.argv[2];
 
