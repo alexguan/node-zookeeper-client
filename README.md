@@ -127,7 +127,7 @@ client.once('connected', function () {
 client.connect();
 ```
 
-More examples can be found [here](tree/master/examples).
+More examples can be found [here](examples).
 
 
 ## Documentation
