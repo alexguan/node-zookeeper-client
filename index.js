@@ -911,6 +911,7 @@ function createClient(connectionString, options) {
 exports.createClient = createClient;
 exports.ACL = ACL;
 exports.Id = Id;
+exports.Client = Client;
 exports.Permission = Permission;
 exports.CreateMode = CreateMode;
 exports.State = State;
