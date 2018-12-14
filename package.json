@@ -1,6 +1,6 @@
 {
   "name": "node-zookeeper-client",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "A pure Javascript ZooKeeper client for Node.js.",
   "author": "Alex Guan <alex.guan@gmail.com>",
   "main": "index.js",
