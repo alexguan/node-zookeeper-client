@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.2.3
+
+1. [Issue #64: Error when using from react](https://github.com/alexguan/node-zookeeper-client/issues/64)
+
 ## 0.2.2
 
 1. [Issue #31: WatcherManager leaks memory on un-rewatched nodes](https://github.com/alexguan/node-zookeeper-client/issues/31)
