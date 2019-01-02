@@ -38,10 +38,9 @@ var ConnectionManager = require('./lib/ConnectionManager.js');
 var CLIENT_DEFAULT_OPTIONS = {
     sessionTimeout : 30000, // Default to 30 seconds.
     spinDelay : 1000, // Defaults to 1 second.
-    retries : 0 // Defaults to 0, no retry.
+    retries : 0, // Defaults to 0, no retry.
+    dataSizeLimit: 1048576 // 1 mega bytes.
 };
-
-var DATA_SIZE_LIMIT = 1048576; // 1 mega bytes.
 
 /**
  * Default state listener to emit user-friendly events.
@@ -383,8 +382,10 @@ Client.prototype.create = function (path, data, acls, mode, callback) {
 
     if (Buffer.isBuffer(data)) {
         assert(
-            data.length <= DATA_SIZE_LIMIT,
-            'data must be equal of smaller than ' + DATA_SIZE_LIMIT + ' bytes.'
+            data.length <= this.options.dataSizeLimit,
+          'data must be equal of smaller than ' +
+          this.options.dataSizeLimit +
+          ' bytes.'
         );
     }
 
@@ -495,8 +496,10 @@ Client.prototype.setData = function (path, data, version, callback) {
     );
     if (Buffer.isBuffer(data)) {
         assert(
-            data.length <= DATA_SIZE_LIMIT,
-            'data must be equal of smaller than ' + DATA_SIZE_LIMIT + ' bytes.'
+            data.length <= this.options.dataSizeLimit,
+          'data must be equal of smaller than ' +
+          this.options.dataSizeLimit +
+          ' bytes.'
         );
     }
 
@@ -862,8 +865,10 @@ Client.prototype.mkdirp = function (path, data, acls, mode, callback) {
 
     if (Buffer.isBuffer(data)) {
         assert(
-            data.length <= DATA_SIZE_LIMIT,
-            'data must be equal of smaller than ' + DATA_SIZE_LIMIT + ' bytes.'
+            data.length <= this.options.dataSizeLimit,
+          'data must be equal of smaller than ' +
+          this.options.dataSizeLimit +
+          ' bytes.'
         );
     }
 
