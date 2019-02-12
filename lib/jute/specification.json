@@ -28,13 +28,15 @@
             { "name" : "lastZxidSeen", "type" : "long"},
             { "name" : "timeOut", "type" : "int"},
             { "name" : "sessionId", "type" : "long"},
-            { "name" : "passwd", "type" : "buffer"}
+            { "name" : "passwd", "type" : "buffer"},
+            { "name" : "readOnly", "type" : "boolean"}
         ],
         "ConnectResponse" : [
             { "name" : "protocolVersion", "type" : "int" },
             { "name" : "timeOut", "type" : "int" },
             { "name" : "sessionId", "type" : "long" },
-            { "name" : "passwd", "type" : "buffer" }
+            { "name" : "passwd", "type" : "buffer" },
+            { "name" : "readOnly", "type" : "boolean"}
         ],
         "RequestHeader" : [
             { "name" : "xid", "type" : "int" },
