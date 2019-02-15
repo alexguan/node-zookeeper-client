@@ -37,15 +37,15 @@ This module has been tested to work with ZooKeeper version 3.4.*.
         + [getSessionId](#buffer-getsessionid)
         + [getSessionPassword](#buffer-getsessionpassword)
         + [getSessionTimeout](#number-getsessiontimeout)
-        + [createAsync](#void-createpath-data-acls-mode-promise)
-        + [removeAsync](#void-removepath-version-promise)
-        + [existsAsync](#void-existspath-watcher-promise)
-        + [getChildrenAsync](#void-getchildrenpath-watcher-promise)
-        + [getDataAsync](#void-getdatapath-watcher-promise)
-        + [setDataAsync](#void-setdatapath-data-version-promise)
-        + [getACLAsync](#void-getaclpath-promise)
-        + [setACLAsync](#void-setaclpath-acls-version-promise)
-        + [mkdirpAsync](#void-mkdirppath-data-acls-mode-promise)
+        + [createAsync](#promise-createasyncpath-data-acls-mode)
+        + [removeAsync](#promise-removeasyncpath-version)
+        + [existsAsync](#promise-existsasyncpath-watcher)
+        + [getChildrenAsync](#promise-getchildrenasyncpath-watcher)
+        + [getDataAsync](#promise-getdataasyncpath-watcher)
+        + [setDataAsync](#promise-setdataasyncpath-data-version)
+        + [getACLAsync](#promise-getaclasyncpath)
+        + [setACLAsync](#promise-setaclasyncpath-acls-version)
+        + [mkdirpAsync](#promise-mkdirpasyncpath-data-acls-mode)
     + [State](#state)
     + [Event](#event)
     + [Transaction](#transaction)
@@ -613,7 +613,7 @@ var sessionTimeout = client.getSessionTimeout();
 
 ---
 
-#### void createAsync(path, [data], [acls], [mode])
+#### Promise createAsync(path, [data], [acls], [mode])
 
 Note: `Promise` version of [create](#void-createpath-data-acls-mode-callback)
 
@@ -631,7 +631,7 @@ zookeeper.createAsync(
 
 ---
 
-#### void removeAsync(path, [version])
+#### Promise removeAsync(path, [version])
 
 Note: `Promise` version of [remove](#void-removepath-version-callback)
 
@@ -646,7 +646,7 @@ zookeeper.removeAsync('/test/demo', -1)
         
 ---
 
-#### void existsAsync(path, [watcher])
+#### Promise existsAsync(path, [watcher])
 
 Note: `Promise` version of [exists](#void-existspath-watcher-callback)
 
@@ -665,7 +665,7 @@ zookeeper.existsAsync('/test/demo')
 
 ---
 
-#### void getChildrenAsync(path, [watcher])
+#### Promise getChildrenAsync(path, [watcher])
 
 Note: `Promise` version of [getChildren](#void-getchildrenpath-watcher-callback)
 
@@ -681,7 +681,7 @@ zookeeper.getChildrenAsync('/test/demo')
 
 ---
 
-#### void getDataAsync(path, [watcher])
+#### Promise getDataAsync(path, [watcher])
 
 Note: `Promise` version of [getData](#void-getdatapath-watcher-callback)
 
@@ -700,7 +700,7 @@ zookeeper.getDataAsync(
 
 ---
 
-#### void setDataAsync(path, data, [version])
+#### Promise setDataAsync(path, data, [version])
 
 Note: `Promise` version of [setData](#void-setdatapath-data-version-callback)
 
@@ -715,7 +715,7 @@ zookeeper.setDataAsync('/test/demo', null, 2)
 
 ---
 
-#### void getACLAsync(path)
+#### Promise getACLAsync(path)
 
 Note: `Promise` version of [getACL](#void-getaclpath-callback)
 
@@ -730,7 +730,7 @@ zookeeper.getACLAsync('/test/demo')
 
 ---
 
-#### void setACLAsync(path, acls, [version])
+#### Promise setACLAsync(path, acls, [version])
 
 Note: `Promise` version of [setACL](#void-setaclpath-acls-version-callback)
 
@@ -752,7 +752,7 @@ zookeeper.setACLAsync(
 
 ---
 
-#### void mkdirpAsync(path, [data], [acls], [mode])
+#### Promise mkdirpAsync(path, [data], [acls], [mode])
 
 Note: `Promise` version of [mkdirp](#void-mkdirppath-data-acls-mode-callback)
 
