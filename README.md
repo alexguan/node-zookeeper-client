@@ -37,6 +37,16 @@ This module has been tested to work with ZooKeeper version 3.4.*.
         + [getSessionId](#buffer-getsessionid)
         + [getSessionPassword](#buffer-getsessionpassword)
         + [getSessionTimeout](#number-getsessiontimeout)
+
+        + [createAsync](#void-createpath-data-acls-mode-promise)
+        + [removeAsync](#void-removepath-version-promise)
+        + [existsAsync](#void-existspath-watcher-promise)
+        + [getChildrenAsync](#void-getchildrenpath-watcher-promise)
+        + [getDataAsync](#void-getdatapath-watcher-promise)
+        + [setDataAsync](#void-setdatapath-data-version-promise)
+        + [getACLAsync](#void-getaclpath-promise)
+        + [setACLAsync](#void-setaclpath-acls-version-promise)
+        + [mkdirpAsync](#void-mkdirppath-data-acls-mode-promise)
     + [State](#state)
     + [Event](#event)
     + [Transaction](#transaction)
@@ -601,6 +611,160 @@ and may change after a re-connect.
 var client = zookeeper.createClient({...});
 var sessionTimeout = client.getSessionTimeout();
 ```
+
+---
+
+#### void createAsync(path, [data], [acls], [mode])
+
+Note: `Promise` version of [create](#void-createpath-data-acls-mode-callback)
+
+**Example**
+
+```javascript
+zookeeper.createAsync(
+    '/test/demo',
+    new Buffer('data'),
+    CreateMode.EPHEMERAL
+).then(function(path) {
+    console.log('Node: %s is created.', path);
+});
+```
+
+---
+
+#### void removeAsync(path, [version])
+
+Note: `Promise` version of [remove](#void-removepath-version-callback)
+
+**Example**
+
+```javascript
+zookeeper.removeAsync('/test/demo', -1)
+    .then(function() {
+        console.log('Node is deleted.');
+    });
+```
+        
+---
+
+#### void existsAsync(path, [watcher])
+
+Note: `Promise` version of [exists](#void-existspath-watcher-callback)
+
+**Example**
+
+```javascript
+zookeeper.existsAsync('/test/demo')
+    .then(function(stat) {
+        if (stat) {
+            console.log('Node exists.');
+        } else {
+            console.log('Node does not exist.');
+        }
+    });
+```
+
+---
+
+#### void getChildrenAsync(path, [watcher])
+
+Note: `Promise` version of [getChildren](#void-getchildrenpath-watcher-callback)
+
+**Example**
+
+```javascript
+zookeeper.getChildrenAsync('/test/demo')
+    .then(function(children, stats) {
+        console.log('Children are: %j.', children);
+    });
+});
+```
+
+---
+
+#### void getDataAsync(path, [watcher])
+
+Note: `Promise` version of [getData](#void-getdatapath-watcher-callback)
+
+**Example**
+
+```javascript
+zookeeper.getData(
+    '/test/demo',
+    function (event) {
+        console.log('Got event: %s.', event);
+    },
+    function (error, data, stat) {
+        if (error) {
+            console.log(error.stack);
+            return;
+        }
+
+        console.log('Got data: %s', data.toString('utf8'));
+    }
+);
+```
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ---
 

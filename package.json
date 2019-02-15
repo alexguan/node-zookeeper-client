@@ -23,8 +23,9 @@
     "node": ">=0.6.0"
   },
   "dependencies": {
-    "underscore": "~1.4.4",
-    "async": "~0.2.7"
+    "async": "~0.2.7",
+    "node-zookeeper-client": "https://github.com/a631807682/node-zookeeper-client.git",
+    "underscore": "~1.4.4"
   },
   "licenses": [
     {

@@ -908,7 +908,7 @@ var asyncMethods = ['create', 'remove', 'setData',
 
 asyncMethods.forEach(function(method) {
     Client.prototype[method + 'Async'] =
-        util.promisify(Client.prototype[method]).bind(Client.prototype);
+        util.promisify(Client.prototype[method]);
 });
 
 /**
