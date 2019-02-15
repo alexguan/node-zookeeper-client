@@ -899,6 +899,19 @@ Client.prototype.transaction = function () {
 };
 
 /**
+ * Create a version that returns promises
+ * @type {Array}
+ */
+var asyncMethods = ['create', 'remove', 'setData',
+    'getData', 'setACL', 'getACL', 'exists', 'getChildren', 'mkdirp'
+];
+
+asyncMethods.forEach(function(method) {
+    Client.prototype[method + 'Async'] =
+        util.promisify(Client.prototype[method]).bind(Client.prototype);
+});
+
+/**
  * Create a new ZooKeeper client.
  *
  * @method createClient
@@ -908,6 +921,8 @@ function createClient(connectionString, options) {
     return new Client(connectionString, options);
 }
 
+// export 'Client' that user can inherit it 
+exports.Client = Client;
 exports.createClient = createClient;
 exports.ACL = ACL;
 exports.Id = Id;
