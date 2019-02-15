@@ -676,7 +676,6 @@ zookeeper.getChildrenAsync('/test/demo')
     .then(function(children, stats) {
         console.log('Children are: %j.', children);
     });
-});
 ```
 
 ---
@@ -759,7 +758,7 @@ Note: `Promise` version of [mkdirp](#void-mkdirppath-data-acls-mode-callback)
 **Example**
 
 ```javascript
-zookeeper.mkdirp('/test/demo/1/2/3')
+zookeeper.mkdirpAsync('/test/demo/1/2/3')
     .then(function(path) {
         console.log('Node: %s is created.', path);
     });
