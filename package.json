@@ -23,8 +23,8 @@
     "node": ">=0.6.0"
   },
   "dependencies": {
-    "async": "~0.2.7",
-    "underscore": "~1.4.4"
+    "underscore": "~1.4.4",
+    "async": "~0.2.7"
   },
   "licenses": [
     {
