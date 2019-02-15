@@ -613,7 +613,7 @@ var sessionTimeout = client.getSessionTimeout();
 
 ---
 
-#### Promise createAsync(path, [data], [acls], [mode])
+#### promise createAsync(path, [data], [acls], [mode])
 
 Note: `Promise` version of [create](#void-createpath-data-acls-mode-callback)
 
@@ -631,7 +631,7 @@ zookeeper.createAsync(
 
 ---
 
-#### Promise removeAsync(path, [version])
+#### promise removeAsync(path, [version])
 
 Note: `Promise` version of [remove](#void-removepath-version-callback)
 
@@ -646,7 +646,7 @@ zookeeper.removeAsync('/test/demo', -1)
         
 ---
 
-#### Promise existsAsync(path, [watcher])
+#### promise existsAsync(path, [watcher])
 
 Note: `Promise` version of [exists](#void-existspath-watcher-callback)
 
@@ -665,7 +665,7 @@ zookeeper.existsAsync('/test/demo')
 
 ---
 
-#### Promise getChildrenAsync(path, [watcher])
+#### promise getChildrenAsync(path, [watcher])
 
 Note: `Promise` version of [getChildren](#void-getchildrenpath-watcher-callback)
 
@@ -680,7 +680,7 @@ zookeeper.getChildrenAsync('/test/demo')
 
 ---
 
-#### Promise getDataAsync(path, [watcher])
+#### promise getDataAsync(path, [watcher])
 
 Note: `Promise` version of [getData](#void-getdatapath-watcher-callback)
 
@@ -699,7 +699,7 @@ zookeeper.getDataAsync(
 
 ---
 
-#### Promise setDataAsync(path, data, [version])
+#### promise setDataAsync(path, data, [version])
 
 Note: `Promise` version of [setData](#void-setdatapath-data-version-callback)
 
@@ -714,7 +714,7 @@ zookeeper.setDataAsync('/test/demo', null, 2)
 
 ---
 
-#### Promise getACLAsync(path)
+#### promise getACLAsync(path)
 
 Note: `Promise` version of [getACL](#void-getaclpath-callback)
 
@@ -729,7 +729,7 @@ zookeeper.getACLAsync('/test/demo')
 
 ---
 
-#### Promise setACLAsync(path, acls, [version])
+#### promise setACLAsync(path, acls, [version])
 
 Note: `Promise` version of [setACL](#void-setaclpath-acls-version-callback)
 
@@ -751,7 +751,7 @@ zookeeper.setACLAsync(
 
 ---
 
-#### Promise mkdirpAsync(path, [data], [acls], [mode])
+#### promise mkdirpAsync(path, [data], [acls], [mode])
 
 Note: `Promise` version of [mkdirp](#void-mkdirppath-data-acls-mode-callback)
 
