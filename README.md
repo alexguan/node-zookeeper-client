@@ -37,7 +37,6 @@ This module has been tested to work with ZooKeeper version 3.4.*.
         + [getSessionId](#buffer-getsessionid)
         + [getSessionPassword](#buffer-getsessionpassword)
         + [getSessionTimeout](#number-getsessiontimeout)
-
         + [createAsync](#void-createpath-data-acls-mode-promise)
         + [removeAsync](#void-removepath-version-promise)
         + [existsAsync](#void-existspath-watcher-promise)
@@ -689,82 +688,82 @@ Note: `Promise` version of [getData](#void-getdatapath-watcher-callback)
 **Example**
 
 ```javascript
-zookeeper.getData(
+zookeeper.getDataAsync(
     '/test/demo',
-    function (event) {
+    function(event) {
         console.log('Got event: %s.', event);
-    },
-    function (error, data, stat) {
-        if (error) {
-            console.log(error.stack);
-            return;
-        }
-
-        console.log('Got data: %s', data.toString('utf8'));
     }
-);
+).then(function(data, stat) {
+    console.log('Got data: %s', data.toString('utf8'));
+});
 ```
 
 ---
 
+#### void setDataAsync(path, data, [version])
 
+Note: `Promise` version of [setData](#void-setdatapath-data-version-callback)
 
+**Example**
 
+```javascript
+zookeeper.setDataAsync('/test/demo', null, 2)
+    .then(function(stat) {
+        console.log('Data is set.');
+    });
+```
 
+---
 
+#### void getACLAsync(path)
 
+Note: `Promise` version of [getACL](#void-getaclpath-callback)
 
+**Example**
 
+```javascript
+zookeeper.getACLAsync('/test/demo')
+    .then(function(acls, stat) {
+        console.log('ACL(s) are: %j', acls);
+    });
+```
 
+---
 
+#### void setACLAsync(path, acls, [version])
 
+Note: `Promise` version of [setACL](#void-setaclpath-acls-version-callback)
 
+**Example**
 
+```javascript
+zookeeper.setACLAsync(
+    '/test/demo',
+    [
+        new zookeeper.ACL(
+            zookeeeper.Permission.ADMIN,
+            new zookeeper.Id('ip', '127.0.0.1')
+        )
+    ],
+).then(function( acls, stat) {
+    console.log('New ACL is set.');
+});
+```
 
+---
 
+#### void mkdirpAsync(path, [data], [acls], [mode])
 
+Note: `Promise` version of [mkdirp](#void-mkdirppath-data-acls-mode-callback)
 
+**Example**
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```javascript
+zookeeper.mkdirp('/test/demo/1/2/3')
+    .then(function(path) {
+        console.log('Node: %s is created.', path);
+    });
+```
 
 ---
 
