@@ -24,8 +24,10 @@ This module has been tested to work with ZooKeeper version 3.4.*.
         + [close](#void-close)
         + [create](#void-createpath-data-acls-mode-callback)
         + [remove](#void-removepath-version-callback)
+        + [removeAll](#void-removeallpath-version-callback)
         + [exists](#void-existspath-watcher-callback)
         + [getChildren](#void-getchildrenpath-watcher-callback)
+        + [getAllChildren](#void-getallchildrenpath-callback)
         + [getData](#void-getdatapath-watcher-callback)
         + [setData](#void-setdatapath-data-version-callback)
         + [getACL](#void-getaclpath-callback)
@@ -277,6 +279,31 @@ zookeeper.remove('/test/demo', -1, function (error) {
 
 ---
 
+#### void removeAll(path, [version], callback)
+
+Deletes a node and all its children with the given path and version.
+
+**Arguments**
+
+* path `String` - Path of the node.
+* version `Number` - The version of the node, optional, defaults to -1.
+* callback(error) `Function` - The callback function.
+
+**Example**
+
+```javascript
+zookeeper.removeAll('/test/demo', -1, function (error) {
+    if (error) {
+        console.log(error.stack);
+        return;
+    }
+
+    console.log('Nodes removed.');
+});
+```
+
+---
+
 #### void exists(path, [watcher], callback)
 
 Check the existence of a node. The callback will be invoked with the
@@ -345,6 +372,33 @@ zookeeper.getChildren('/test/demo', function (error, children, stats) {
     console.log('Children are: %j.', children);
 });
 ```
+
+---
+
+#### void getAllChildren(path, callback)
+
+Retrieve a list of all children including itself for the given node path.
+
+**Arguments**
+
+* path `String` - Path of the node.
+* callback(error, children) `Function` - The callback function. The
+  children is an array of strings.
+
+**Example**
+
+```javascript
+zookeeper.getAllChildren('/test/demo', function (error, children) {
+    if (error) {
+        console.log(error.stack);
+        return;
+    }
+
+    console.log('Children are: %j.', children);
+});
+```
+
+---
 
 #### void getData(path, [watcher], callback)
 
