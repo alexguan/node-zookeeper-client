@@ -1,6 +1,6 @@
 {
   "name": "node-zookeeper-client",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "A pure Javascript ZooKeeper client for Node.js.",
   "author": "Alex Guan <alex.guan@gmail.com>",
   "main": "index.js",
@@ -20,7 +20,7 @@
     "coverage": "istanbul cover _mocha --recursive test/*"
   },
   "engines": {
-    "node": ">=0.6.0"
+    "node": ">=4.0.0"
   },
   "dependencies": {
     "underscore": "~1.4.4",

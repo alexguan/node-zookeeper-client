@@ -69,6 +69,44 @@ function defaultStateListener(state) {
 }
 
 /**
+ * Only used in attempt function
+ * @private
+ * @param a {Function}
+ * @param b {Function}
+ * @param getResult {Function}
+ * @param [callback] {Function}
+ * @returns {Promise}
+ */
+function whilst(a, b, getResult, callback) {
+    var resolve,
+        reject;
+
+    async.whilst(a, b, function() {
+        var args = [],
+            result = getResult();
+
+        args.push(result.error);
+        Array.prototype.push.apply(args, result.args);
+        if (callback) {
+            callback.apply(null, args);
+            return;
+        }
+        if (result.error) {
+            reject(result.error);
+        } else {
+            resolve.apply(null, result.args);
+        }
+    });
+    if (!callback) {
+        return new Promise(function(_resolve, _reject) {
+            resolve = _resolve;
+            reject = _reject;
+        });
+    }
+    return Promise.resolve();
+}
+
+/**
  * Try to execute the given function 'fn'. If it fails to execute, retry for
  * 'self.options.retires' times. The duration between each retry starts at
  * 1000ms and grows exponentially as:
@@ -97,6 +135,7 @@ function defaultStateListener(state) {
  * @param self {Client} an instance of zookeeper client.
  * @param fn {Function} the function to execute.
  * @param callback {Function} optional callback function.
+ * @returns {Promise}
  *
  */
 function attempt(self, fn, callback) {
@@ -112,9 +151,7 @@ function attempt(self, fn, callback) {
         'retries must be an integer greater or equal to 0.'
     );
 
-    assert(typeof callback === 'function', 'callback must be a function.');
-
-    async.whilst(
+    return whilst(
         function () {
             return count <= retries && retry;
         },
@@ -155,17 +192,10 @@ function attempt(self, fn, callback) {
                 }
             });
         },
-        function (error) {
-            var args = [],
-                result = results[count - 1];
-
-            if (callback) {
-                args.push(result.error);
-                Array.prototype.push.apply(args, result.args);
-
-                callback.apply(null, args);
-            }
-        }
+        function () {
+            return results[count - 1];
+        },
+        callback
     );
 }
 
@@ -343,7 +373,8 @@ Client.prototype.addAuthInfo = function (scheme, auth) {
  * @param [data=undefined] {Buffer} The data buffer.
  * @param [acls=ACL.OPEN_ACL_UNSAFE] {Array} An array of ACL object.
  * @param [mode=CreateMode.PERSISTENT] {CreateMode} The creation mode.
- * @param callback {Function} The callback function.
+ * @param [callback] {Function} The callback function.
+ * @returns {Promise<String>}
  */
 Client.prototype.create = function (path, data, acls, mode, callback) {
     var self = this,
@@ -368,10 +399,6 @@ Client.prototype.create = function (path, data, acls, mode, callback) {
         }
     });
 
-    assert(
-        typeof callback === 'function',
-        'callback must be a function.'
-    );
 
     acls = Array.isArray(acls) ? acls : ACL.OPEN_ACL_UNSAFE;
     mode = typeof mode === 'number' ? mode : CreateMode.PERSISTENT;
@@ -407,7 +434,7 @@ Client.prototype.create = function (path, data, acls, mode, callback) {
 
     request = new jute.Request(header, payload);
 
-    attempt(
+    return attempt(
         self,
         function (attempts, next) {
             self.connectionManager.queue(request, function (error, response) {
@@ -430,7 +457,8 @@ Client.prototype.create = function (path, data, acls, mode, callback) {
  * @method delete
  * @param path {String} The node path.
  * @param [version=-1] {Number} The version of the node.
- * @param callback {Function} The callback function.
+ * @param [callback] {Function} The callback function.
+ * @returns {Promise<void>}
  */
 Client.prototype.remove = function (path, version, callback) {
     if (!callback) {
@@ -440,7 +468,6 @@ Client.prototype.remove = function (path, version, callback) {
 
     Path.validate(path);
 
-    assert(typeof callback === 'function', 'callback must be a function.');
     assert(typeof version === 'number', 'version must be a number.');
 
 
@@ -456,7 +483,7 @@ Client.prototype.remove = function (path, version, callback) {
 
     request = new jute.Request(header, payload);
 
-    attempt(
+    return attempt(
         self,
         function (attempts, next) {
             self.connectionManager.queue(request, function (error, response) {
@@ -476,17 +503,16 @@ Client.prototype.remove = function (path, version, callback) {
  * @param path {String} The node path.
  * @param data {Buffer} The data buffer.
  * @param [version=-1] {Number} The version of the node.
- * @param callback {Function} The callback function.
+ * @param [callback] {Function} The callback function.
+ * @returns {Promise<Stat>}
  */
 Client.prototype.setData = function (path, data, version, callback) {
-    if (!callback) {
-        callback = version;
+    if (arguments.length === 2) {
         version = -1;
     }
 
     Path.validate(path);
 
-    assert(typeof callback === 'function', 'callback must be a function.');
     assert(typeof version === 'number', 'version must be a number.');
 
     assert(
@@ -514,7 +540,7 @@ Client.prototype.setData = function (path, data, version, callback) {
 
     request = new jute.Request(header, payload);
 
-    attempt(
+    return attempt(
         self,
         function (attempts, next) {
             self.connectionManager.queue(request, function (error, response) {
@@ -543,7 +569,8 @@ Client.prototype.setData = function (path, data, version, callback) {
  * @method getData
  * @param path {String} The node path.
  * @param [watcher] {Function} The watcher function.
- * @param callback {Function} The callback function.
+ * @param [callback] {Function} The callback function.
+ * @returns {Promise<String | Stat[]>}
  */
 Client.prototype.getData = function (path, watcher, callback) {
     if (!callback) {
@@ -552,8 +579,6 @@ Client.prototype.getData = function (path, watcher, callback) {
     }
 
     Path.validate(path);
-
-    assert(typeof callback === 'function', 'callback must be a function.');
 
     var self = this,
         header = new jute.protocol.RequestHeader(),
@@ -567,7 +592,7 @@ Client.prototype.getData = function (path, watcher, callback) {
 
     request = new jute.Request(header, payload);
 
-    attempt(
+    return attempt(
         self,
         function (attempts, next) {
             self.connectionManager.queue(request, function (error, response) {
@@ -597,16 +622,15 @@ Client.prototype.getData = function (path, watcher, callback) {
  * @param path {String} The node path.
  * @param acls {Array} The array of ACL objects.
  * @param [version] {Number} The version of the node.
- * @param callback {Function} The callback function.
+ * @param [callback] {Function} The callback function.
+ * @returns {Promise<Stat>}
  */
 Client.prototype.setACL = function (path, acls, version, callback) {
-    if (!callback) {
-        callback = version;
+    if (arguments.length === 2) {
         version = -1;
     }
 
     Path.validate(path);
-    assert(typeof callback === 'function', 'callback must be a function.');
     assert(
         Array.isArray(acls) && acls.length > 0,
         'acls must be a non-empty array.'
@@ -629,7 +653,7 @@ Client.prototype.setACL = function (path, acls, version, callback) {
 
     request = new jute.Request(header, payload);
 
-    attempt(
+    return attempt(
         self,
         function (attempts, next) {
             self.connectionManager.queue(request, function (error, response) {
@@ -650,11 +674,11 @@ Client.prototype.setACL = function (path, acls, version, callback) {
  *
  * @method getACL
  * @param path {String} The node path.
- * @param callback {Function} The callback function.
+ * @param [callback] {Function} The callback function.
+ * @returns {Promise<Stat>}
  */
 Client.prototype.getACL = function (path, callback) {
     Path.validate(path);
-    assert(typeof callback === 'function', 'callback must be a function.');
 
     var self = this,
         header = new jute.protocol.RequestHeader(),
@@ -666,7 +690,7 @@ Client.prototype.getACL = function (path, callback) {
     payload.path = path;
     request = new jute.Request(header, payload);
 
-    attempt(
+    return attempt(
         self,
         function (attempts, next) {
             self.connectionManager.queue(request, function (error, response) {
@@ -702,16 +726,11 @@ Client.prototype.getACL = function (path, callback) {
  * @method exists
  * @param path {String} The node path.
  * @param [watcher] {Function} The watcher function.
- * @param callback {Function} The callback function.
+ * @param [callback] {Function} The callback function.
+ * @returns {Promise<Stat | Null>}
  */
 Client.prototype.exists = function (path, watcher, callback) {
-    if (!callback) {
-        callback = watcher;
-        watcher = undefined;
-    }
-
     Path.validate(path);
-    assert(typeof callback === 'function', 'callback must be a function.');
 
     var self = this,
         header = new jute.protocol.RequestHeader(),
@@ -725,7 +744,7 @@ Client.prototype.exists = function (path, watcher, callback) {
 
     request = new jute.Request(header, payload);
 
-    attempt(
+    return attempt(
         self,
         function (attempts, next) {
             self.connectionManager.queue(request, function (error, response) {
@@ -771,16 +790,12 @@ Client.prototype.exists = function (path, watcher, callback) {
  * @method getChildren
  * @param path {String} The node path.
  * @param [watcher] {Function} The watcher function.
- * @param callback {Function} The callback function.
+ * @param [callback] {Function} The callback function.
+ * @returns {Promise<(String[] | Stat)[]>}
  */
 Client.prototype.getChildren = function (path, watcher, callback) {
-    if (!callback) {
-        callback = watcher;
-        watcher = undefined;
-    }
 
     Path.validate(path);
-    assert(typeof callback === 'function', 'callback must be a function.');
 
     var self = this,
         header = new jute.protocol.RequestHeader(),
@@ -794,7 +809,7 @@ Client.prototype.getChildren = function (path, watcher, callback) {
 
     request = new jute.Request(header, payload);
 
-    attempt(
+    return attempt(
         self,
         function (attempts, next) {
             self.connectionManager.queue(request, function (error, response) {
@@ -823,7 +838,8 @@ Client.prototype.getChildren = function (path, watcher, callback) {
  * @param [data=undefined] {Buffer} The data buffer.
  * @param [acls=ACL.OPEN_ACL_UNSAFE] {Array} The array of ACL object.
  * @param [mode=CreateMode.PERSISTENT] {CreateMode} The creation mode.
- * @param callback {Function} The callback function.
+ * @param [callback] {Function} The callback function.
+ * @returns {Promise<String>}
  */
 Client.prototype.mkdirp = function (path, data, acls, mode, callback) {
     var optionalArgs = [data, acls, mode, callback],
@@ -846,11 +862,6 @@ Client.prototype.mkdirp = function (path, data, acls, mode, callback) {
             callback = arg;
         }
     });
-
-    assert(
-        typeof callback === 'function',
-        'callback must be a function.'
-    );
 
     acls = Array.isArray(acls) ? acls : ACL.OPEN_ACL_UNSAFE;
     mode = typeof mode === 'number' ? mode : CreateMode.PERSISTENT;
