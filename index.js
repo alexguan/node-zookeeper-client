@@ -74,7 +74,7 @@ function defaultStateListener(state) {
  * @param a {Function}
  * @param b {Function}
  * @param getResult {Function}
- * @param callback {[Function]}
+ * @param [callback] {Function}
  * @returns {Promise}
  */
 function whilst(a, b, getResult, callback) {
