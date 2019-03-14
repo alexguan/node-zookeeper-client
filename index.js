@@ -78,26 +78,28 @@ function defaultStateListener(state) {
  * @returns {Promise}
  */
 function whilst(a, b, getResult, callback) {
-    if (typeof callback === 'function') {
-        async.whilst(a, b, function(err) {
-            var args = [],
-                result = getResult();
-            args.push(result.error);
-            Array.prototype.push.apply(args, result.args);
+    var resolve, reject;
+    async.whilst(a, b, function() {
+        var args = [],
+            result = getResult();
+        args.push(result.error);
+        Array.prototype.push.apply(args, result.args);
+        if (callback) {
             callback.apply(null, args);
-        });
-        return;
-    }
-    return new Promise(function(resolve, reject) {
-        async.whilst(a, b, function() {
-            var result = getResult();
-            if (result.error) {
-                reject(result.error);
-                return;
-            }
+            return;
+        }
+        if (result.error) {
+            reject(result.error);
+        } else {
             resolve.apply(null, result.args);
-        });
+        }
     });
+    if (!callback) {
+        return new Promise(function(a, b) {
+            resolve = a;
+            reject = b;
+        });
+    }
 }
 
 /**
