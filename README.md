@@ -876,6 +876,7 @@ Several methods are optional promisified.
 - Client.setData
 - Client.getACL
 - Client.setACL
+- Client.mkdirp
 - Transaction.commit
 
 All methods above will return a promise if they fail to receive a callback function as the last parameter.
