@@ -50,7 +50,7 @@ This module has been tested to work with ZooKeeper version 3.4.*.
         + [getPath](#string-getpath)
         + [getName](#string-getname)
         + [toString](#string-tostring)
-    + [Exception](#exception)
++ [Promise](#promise)
 + [Dependency](#dependency)
 + [License](#license)
 
@@ -858,12 +858,40 @@ Return the exception name as defined in aforementioned list.
 
 ---
 
-### String toString()
+#### String toString()
 
 Return the exception in a readable string.
 
 ---
 
+## Promise
+
+Several methods are optional promisified.
+
+- Client.create
+- Client.remove
+- Client.exists
+- Client.getChildren
+- Client.getData
+- Client.setData
+- Client.getACL
+- Client.setACL
+- Transaction.commit
+
+All methods above will return a promise if they fail to receive a callback function as the last parameter.
+
+### Example
+
+```javascript
+zookeeper.create('/a', Buffer.from('hello'))
+    .then((path) => {
+        assert(path === '/a');
+    }, (err) => {
+        console.log(err);
+    });
+```
+
+---
 
 ## Dependency
 

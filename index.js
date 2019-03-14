@@ -69,6 +69,7 @@ function defaultStateListener(state) {
 }
 
 /**
+ * Only used in attempt function
  * @private
  * @param a {Function}
  * @param b {Function}
@@ -85,8 +86,7 @@ function whilst(a, b, getResult, callback) {
             Array.prototype.push.apply(args, result.args);
             callback.apply(null, args);
         });
-        // always return a promise
-        return Promise.resolve();
+        return;
     }
     return new Promise(function(resolve, reject) {
         async.whilst(a, b, function() {
@@ -188,7 +188,8 @@ function attempt(self, fn, callback) {
         },
         function () {
             return results[count - 1];
-        }
+        },
+        callback
     );
 }
 
