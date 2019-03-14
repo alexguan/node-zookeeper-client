@@ -78,10 +78,13 @@ function defaultStateListener(state) {
  * @returns {Promise}
  */
 function whilst(a, b, getResult, callback) {
-    var resolve, reject;
+    var resolve,
+        reject;
+
     async.whilst(a, b, function() {
         var args = [],
             result = getResult();
+
         args.push(result.error);
         Array.prototype.push.apply(args, result.args);
         if (callback) {
@@ -95,11 +98,12 @@ function whilst(a, b, getResult, callback) {
         }
     });
     if (!callback) {
-        return new Promise(function(a, b) {
-            resolve = a;
-            reject = b;
+        return new Promise(function(_resolve, _reject) {
+            resolve = _resolve;
+            reject = _reject;
         });
     }
+    return Promise.resolve();
 }
 
 /**
@@ -504,7 +508,7 @@ Client.prototype.remove = function (path, version, callback) {
  */
 Client.prototype.setData = function (path, data, version, callback) {
     if (arguments.length === 2) {
-        version === -1;
+        version = -1;
     }
 
     Path.validate(path);

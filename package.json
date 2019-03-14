@@ -20,7 +20,7 @@
     "coverage": "istanbul cover _mocha --recursive test/*"
   },
   "engines": {
-    "node": ">=0.6.0"
+    "node": ">=4.0.0"
   },
   "dependencies": {
     "underscore": "~1.4.4",
