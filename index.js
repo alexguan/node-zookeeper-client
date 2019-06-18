@@ -329,7 +329,7 @@ Client.prototype.addAuthInfo = function (scheme, auth) {
         'auth must be a valid instance of Buffer'
     );
 
-    var buffer = new Buffer(auth.length);
+    var buffer = Buffer.alloc(auth.length);
 
     auth.copy(buffer);
     this.connectionManager.addAuthInfo(scheme, buffer);
@@ -401,7 +401,7 @@ Client.prototype.create = function (path, data, acls, mode, callback) {
     payload.flags = mode;
 
     if (Buffer.isBuffer(data)) {
-        payload.data = new Buffer(data.length);
+        payload.data = Buffer.alloc(data.length);
         data.copy(payload.data);
     }
 
@@ -508,7 +508,7 @@ Client.prototype.setData = function (path, data, version, callback) {
     header.type = jute.OP_CODES.SET_DATA;
 
     payload.path = path;
-    payload.data = new Buffer(data.length);
+    payload.data = Buffer.alloc(data.length);
     data.copy(payload.data);
     payload.version = version;
 
