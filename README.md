@@ -235,7 +235,7 @@ Create a node with given path, data, acls and mode.
 ```javascript
 zookeeper.create(
     '/test/demo',
-    new Buffer('data'),
+    Buffer.from('data'),
     CreateMode.EPHEMERAL,
     function (error, path) {
         if (error) {
@@ -534,7 +534,7 @@ Add the specified scheme:auth information to this client.
 **Example**
 
 ```javascript
-zookeeper.addAuthInfo('ip', new Buffer('127.0.0.1'));
+zookeeper.addAuthInfo('ip', Buffer.from('127.0.0.1'));
 ```
 
 ---
@@ -710,8 +710,8 @@ var client = zookeeper.createClient(process.argv[2] || 'localhost:2181');
 client.once('connected', function () {
     client.transaction().
         create('/txn').
-        create('/txn/1', new Buffer('transaction')).
-        setData('/txn/1', new Buffer('test'), -1).
+        create('/txn/1', Buffer.from('transaction')).
+        setData('/txn/1', Buffer.from('test'), -1).
         check('/txn/1').
         remove('/txn/1', -1).
         remove('/txn').
