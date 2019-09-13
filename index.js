@@ -474,7 +474,7 @@ Client.prototype.remove = function (path, version, callback) {
  * @param [version=-1] {Number} The version of the node.
  * @param callback {Function} The callback function.
  */
-Client.prototype.removeAll = function(path, version, callback) {
+Client.prototype.removeRecursive = function(path, version, callback) {
     if (!callback) {
         callback = version;
         version = -1;

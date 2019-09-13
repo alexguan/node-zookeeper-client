@@ -24,7 +24,7 @@ This module has been tested to work with ZooKeeper version 3.4.*.
         + [close](#void-close)
         + [create](#void-createpath-data-acls-mode-callback)
         + [remove](#void-removepath-version-callback)
-        + [removeAll](#void-removeallpath-version-callback)
+        + [removeRecursive](#void-removerecursivepath-version-callback)
         + [exists](#void-existspath-watcher-callback)
         + [getChildren](#void-getchildrenpath-watcher-callback)
         + [listSubTreeBFS](#void-listsubtreebfspath-callback)
@@ -279,7 +279,7 @@ zookeeper.remove('/test/demo', -1, function (error) {
 
 ---
 
-#### void removeAll(path, [version], callback)
+#### void removeRecursive(path, [version], callback)
 
 Deletes a node and all its children with the given path and version.
 
@@ -292,7 +292,7 @@ Deletes a node and all its children with the given path and version.
 **Example**
 
 ```javascript
-zookeeper.removeAll('/test/demo', -1, function (error) {
+zookeeper.removeRecursive('/test/demo', -1, function (error) {
     if (error) {
         console.log(error.stack);
         return;
