@@ -487,7 +487,7 @@ Client.prototype.removeAll = function(path, version, callback) {
 
     var self = this;
 
-    self.getAllChildren(path, function (error, children) {
+    self.listSubTreeBFS(path, function (error, children) {
         if (error) {
             callback(error);
             return;
@@ -858,11 +858,11 @@ Client.prototype.getChildren = function (path, watcher, callback) {
  * the tree, but the state as it exists across multiple RPCs from clients to the
  * ensemble.
  *
- * @method getAllChildren
+ * @method listSubTreeBFS
  * @param path {String} The node path.
  * @param callback {Function} The callback function.
  */
-Client.prototype.getAllChildren = function(path, callback) {
+Client.prototype.listSubTreeBFS = function(path, callback) {
     Path.validate(path);
     assert(typeof callback === 'function', 'callback must be a function.');
 

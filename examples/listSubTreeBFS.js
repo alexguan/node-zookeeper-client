@@ -6,7 +6,7 @@ var path = process.argv[3];
 client.once('connected', function () {
     console.log('Connected to the server.');
 
-    client.getAllChildren(path, function (error, children) {
+    client.listSubTreeBFS(path, function (error, children) {
         if (error) {
             console.log('Failed to list all child nodes of %s due to:', path, error);
             return;

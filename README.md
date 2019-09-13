@@ -27,7 +27,7 @@ This module has been tested to work with ZooKeeper version 3.4.*.
         + [removeAll](#void-removeallpath-version-callback)
         + [exists](#void-existspath-watcher-callback)
         + [getChildren](#void-getchildrenpath-watcher-callback)
-        + [getAllChildren](#void-getallchildrenpath-callback)
+        + [listSubTreeBFS](#void-listsubtreebfspath-callback)
         + [getData](#void-getdatapath-watcher-callback)
         + [setData](#void-setdatapath-data-version-callback)
         + [getACL](#void-getaclpath-callback)
@@ -227,7 +227,7 @@ Create a node with given path, data, acls and mode.
 * path `String` - Path of the node.
 * data `Buffer` - The data buffer, optional, defaults to null.
 * acls `Array` - An array of [ACL](#acl) objects, optional, defaults to
-  `ACL.OPEN_ACL_UNSAFE` 
+  `ACL.OPEN_ACL_UNSAFE`
 * mode `CreateMode` -  The creation mode, optional, defaults to
   `CreateMode.PERSISTENT`
 * callback(error, path) `Function` - The callback function.
@@ -375,7 +375,7 @@ zookeeper.getChildren('/test/demo', function (error, children, stats) {
 
 ---
 
-#### void getAllChildren(path, callback)
+#### void listSubTreeBFS(path, callback)
 
 Retrieve a list of all children including itself for the given node path.
 
@@ -388,7 +388,7 @@ Retrieve a list of all children including itself for the given node path.
 **Example**
 
 ```javascript
-zookeeper.getAllChildren('/test/demo', function (error, children) {
+zookeeper.listSubTreeBFS('/test/demo', function (error, children) {
     if (error) {
         console.log(error.stack);
         return;
@@ -556,7 +556,7 @@ Create given path in a way similar to `mkdir -p`.
 * path `String` - Path of the node.
 * data `Buffer` - The data buffer, optional, defaults to `null`.
 * acls `Array` - An array of [ACL](#acl) objects, optional, defaults to
-  `ACL.OPEN_ACL_UNSAFE` 
+  `ACL.OPEN_ACL_UNSAFE`
 * mode `CreateMode` -  The creation mode, optional, defaults to
   `CreateMode.PERSISTENT`
 * callback(error, path) `Function` - The callback function.
@@ -644,7 +644,7 @@ var pwd = client.getSessionPassword();
 ---
 
 #### Number getSessionTimeout()
- 
+
 Returns the *negotiated* session timeout (in milliseconds) for this client
 instance. The value returned is not valid until the client connects to a server
 and may change after a re-connect.
@@ -714,7 +714,7 @@ Optionally, you can register watcher functions when calling
 [`exists`](#void-existspath-watcher-callback),
 [`getChildren`](#void-getchildrenpath-watcher-callback) and
 [`getData`](#void-getdatapath-watcher-callback) methods. The watcher function
-will be called with an instance of `Event`. 
+will be called with an instance of `Event`.
 
 **Properties**
 
@@ -797,7 +797,7 @@ Add a create operation with given path, data, acls and mode.
 * path `String` - Path of the node.
 * data `Buffer` - The data buffer, optional, defaults to null.
 * acls `Array` - An array of [ACL](#acl) objects, optional, defaults to
-  `ACL.OPEN_ACL_UNSAFE` 
+  `ACL.OPEN_ACL_UNSAFE`
 * mode `CreateMode` -  The creation mode, optional, defaults to
   `CreateMode.PERSISTENT`
 
@@ -827,7 +827,7 @@ Add a check (existence) operation with given path and optional version.
 ---
 
 #### Transaction remove(path, data, version)
- 
+
 Add a delete operation with the given path and optional version.
 
 **Arguments**
@@ -895,7 +895,7 @@ zookeeper.create('/test/demo', function (error, path) {
 
 #### Number getCode()
 
-Return the error code of the exception. 
+Return the error code of the exception.
 
 ---
 
