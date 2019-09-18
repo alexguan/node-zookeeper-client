@@ -468,6 +468,45 @@ Client.prototype.remove = function (path, version, callback) {
 };
 
 /**
+ * Deletes a node and all its children.
+ *
+ * @param path {String} The node path.
+ * @param [version=-1] {Number} The version of the node.
+ * @param callback {Function} The callback function.
+ */
+Client.prototype.removeRecursive = function(path, version, callback) {
+    if (!callback) {
+        callback = version;
+        version = -1;
+    }
+
+    Path.validate(path);
+
+    assert(typeof callback === 'function', 'callback must be a function.');
+    assert(typeof version === 'number', 'version must be a number.');
+
+    var self = this;
+
+    self.listSubTreeBFS(path, function (error, children) {
+        if (error) {
+            callback(error);
+            return;
+        }
+        async.eachSeries(children.reverse(), function (nodePath, next) {
+            self.remove(nodePath, version, function(err) {
+                // Skip NO_NODE exception
+                if (err && err.getCode() === Exception.NO_NODE) {
+                    next(null);
+                    return;
+                }
+
+                next(err);
+            });
+        }, callback);
+    });
+};
+
+/**
  * Set the data for the node of the given path if such a node exists and the
  * optional given version matches the version of the node (if the given
  * version is -1, it matches any node's versions).
@@ -812,6 +851,45 @@ Client.prototype.getChildren = function (path, watcher, callback) {
         },
         callback
     );
+};
+
+/**
+ * BFS list of the system under path. Note that this is not an atomic snapshot of
+ * the tree, but the state as it exists across multiple RPCs from clients to the
+ * ensemble.
+ *
+ * @method listSubTreeBFS
+ * @param path {String} The node path.
+ * @param callback {Function} The callback function.
+ */
+Client.prototype.listSubTreeBFS = function(path, callback) {
+    Path.validate(path);
+    assert(typeof callback === 'function', 'callback must be a function.');
+
+    var self = this;
+    var tree = [path];
+
+    async.reduce(tree, tree, function(memo, item, next) {
+        self.getChildren(item, function (error, children) {
+            if (error) {
+                next(error);
+                return;
+            }
+            if (!children || !Array.isArray(children) || !children.length) {
+                next(null, tree);
+                return;
+            }
+            children.forEach(function(child) {
+                var childPath = item + '/' + child;
+
+                if (item === '/') {
+                    childPath = item + child;
+                }
+                tree.push(childPath);
+            });
+            next(null, tree);
+        });
+    }, callback);
 };
 
 /**

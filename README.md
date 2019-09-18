@@ -24,8 +24,10 @@ This module has been tested to work with ZooKeeper version 3.4.*.
         + [close](#void-close)
         + [create](#void-createpath-data-acls-mode-callback)
         + [remove](#void-removepath-version-callback)
+        + [removeRecursive](#void-removerecursivepath-version-callback)
         + [exists](#void-existspath-watcher-callback)
         + [getChildren](#void-getchildrenpath-watcher-callback)
+        + [listSubTreeBFS](#void-listsubtreebfspath-callback)
         + [getData](#void-getdatapath-watcher-callback)
         + [setData](#void-setdatapath-data-version-callback)
         + [getACL](#void-getaclpath-callback)
@@ -225,7 +227,7 @@ Create a node with given path, data, acls and mode.
 * path `String` - Path of the node.
 * data `Buffer` - The data buffer, optional, defaults to null.
 * acls `Array` - An array of [ACL](#acl) objects, optional, defaults to
-  `ACL.OPEN_ACL_UNSAFE` 
+  `ACL.OPEN_ACL_UNSAFE`
 * mode `CreateMode` -  The creation mode, optional, defaults to
   `CreateMode.PERSISTENT`
 * callback(error, path) `Function` - The callback function.
@@ -272,6 +274,31 @@ zookeeper.remove('/test/demo', -1, function (error) {
     }
 
     console.log('Node is deleted.');
+});
+```
+
+---
+
+#### void removeRecursive(path, [version], callback)
+
+Deletes a node and all its children with the given path and version.
+
+**Arguments**
+
+* path `String` - Path of the node.
+* version `Number` - The version of the node, optional, defaults to -1.
+* callback(error) `Function` - The callback function.
+
+**Example**
+
+```javascript
+zookeeper.removeRecursive('/test/demo', -1, function (error) {
+    if (error) {
+        console.log(error.stack);
+        return;
+    }
+
+    console.log('Nodes removed.');
 });
 ```
 
@@ -345,6 +372,33 @@ zookeeper.getChildren('/test/demo', function (error, children, stats) {
     console.log('Children are: %j.', children);
 });
 ```
+
+---
+
+#### void listSubTreeBFS(path, callback)
+
+Retrieve a list of all children including itself for the given node path.
+
+**Arguments**
+
+* path `String` - Path of the node.
+* callback(error, children) `Function` - The callback function. The
+  children is an array of strings.
+
+**Example**
+
+```javascript
+zookeeper.listSubTreeBFS('/test/demo', function (error, children) {
+    if (error) {
+        console.log(error.stack);
+        return;
+    }
+
+    console.log('Children are: %j.', children);
+});
+```
+
+---
 
 #### void getData(path, [watcher], callback)
 
@@ -502,7 +556,7 @@ Create given path in a way similar to `mkdir -p`.
 * path `String` - Path of the node.
 * data `Buffer` - The data buffer, optional, defaults to `null`.
 * acls `Array` - An array of [ACL](#acl) objects, optional, defaults to
-  `ACL.OPEN_ACL_UNSAFE` 
+  `ACL.OPEN_ACL_UNSAFE`
 * mode `CreateMode` -  The creation mode, optional, defaults to
   `CreateMode.PERSISTENT`
 * callback(error, path) `Function` - The callback function.
@@ -590,7 +644,7 @@ var pwd = client.getSessionPassword();
 ---
 
 #### Number getSessionTimeout()
- 
+
 Returns the *negotiated* session timeout (in milliseconds) for this client
 instance. The value returned is not valid until the client connects to a server
 and may change after a re-connect.
@@ -660,7 +714,7 @@ Optionally, you can register watcher functions when calling
 [`exists`](#void-existspath-watcher-callback),
 [`getChildren`](#void-getchildrenpath-watcher-callback) and
 [`getData`](#void-getdatapath-watcher-callback) methods. The watcher function
-will be called with an instance of `Event`. 
+will be called with an instance of `Event`.
 
 **Properties**
 
@@ -743,7 +797,7 @@ Add a create operation with given path, data, acls and mode.
 * path `String` - Path of the node.
 * data `Buffer` - The data buffer, optional, defaults to null.
 * acls `Array` - An array of [ACL](#acl) objects, optional, defaults to
-  `ACL.OPEN_ACL_UNSAFE` 
+  `ACL.OPEN_ACL_UNSAFE`
 * mode `CreateMode` -  The creation mode, optional, defaults to
   `CreateMode.PERSISTENT`
 
@@ -773,7 +827,7 @@ Add a check (existence) operation with given path and optional version.
 ---
 
 #### Transaction remove(path, data, version)
- 
+
 Add a delete operation with the given path and optional version.
 
 **Arguments**
@@ -841,7 +895,7 @@ zookeeper.create('/test/demo', function (error, path) {
 
 #### Number getCode()
 
-Return the error code of the exception. 
+Return the error code of the exception.
 
 ---
 
