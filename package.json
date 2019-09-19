@@ -1,6 +1,6 @@
 {
   "name": "node-zookeeper-client",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A pure Javascript ZooKeeper client for Node.js.",
   "author": "Alex Guan <alex.guan@gmail.com>",
   "license": "MIT",
@@ -35,8 +35,8 @@
   ],
   "devDependencies": {
     "chai": "~1.5.0",
-    "eslint": "^3.2.0",
-    "mocha": "^6.1.4",
+    "eslint": "^6.4.0",
+    "mocha": "^6.2.0",
     "nyc": "^14.1.1"
   }
 }
