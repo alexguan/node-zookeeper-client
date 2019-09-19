@@ -21,7 +21,7 @@
     "coverage": "nyc npm test"
   },
   "engines": {
-    "node": ">=6.0.0"
+    "node": ">=8.10.0"
   },
   "dependencies": {
     "underscore": "~1.4.4",

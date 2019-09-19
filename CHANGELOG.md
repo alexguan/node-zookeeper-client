@@ -4,6 +4,7 @@
 
 1. [New: Add removeRecursive and listSubTreeBFS methods](https://github.com/alexguan/node-zookeeper-client/pull/88)
 2. Upgrade eslint and mocha dependencies
+3. Bump Node requirement to >=8.10.0
 
 # 1.0.0
 
