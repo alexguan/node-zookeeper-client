@@ -1,5 +1,8 @@
 # Change Log
 
+## 1.2.0
+1. [New: Support for container nodes](https://github.com/alexguan/node-zookeeper-client/pull/107)
+
 ## 1.1.0
 
 1. [New: Add removeRecursive and listSubTreeBFS methods](https://github.com/alexguan/node-zookeeper-client/pull/88)

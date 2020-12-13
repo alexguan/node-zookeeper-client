@@ -391,7 +391,9 @@ Client.prototype.create = function (path, data, acls, mode, callback) {
     assert(acls.length > 0, 'acls must be a non-empty array.');
 
     header = new jute.protocol.RequestHeader();
-    header.type = jute.OP_CODES.CREATE;
+    header.type = mode === CreateMode.CONTAINER ?
+        jute.OP_CODES.CREATE_CONTAINER :
+        jute.OP_CODES.CREATE;
 
     payload = new jute.protocol.CreateRequest();
     payload.path = path;
