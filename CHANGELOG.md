@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.1.1
+
+Upgrade the dependencies to remove potential security related issues
+
 ## 1.1.0
 
 1. [New: Add removeRecursive and listSubTreeBFS methods](https://github.com/alexguan/node-zookeeper-client/pull/88)
