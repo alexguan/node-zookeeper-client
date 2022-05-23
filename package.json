@@ -24,8 +24,8 @@
     "node": ">=8.10.0"
   },
   "dependencies": {
-    "underscore": "~1.12.1",
-    "async": "~0.2.7"
+    "underscore": "~1.13.3",
+    "async": "~3.2.3"
   },
   "licenses": [
     {
