@@ -1,6 +1,6 @@
 {
   "name": "node-zookeeper-client",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "A pure Javascript ZooKeeper client for Node.js.",
   "author": "Alex Guan <alex.guan@gmail.com>",
   "license": "MIT",
@@ -24,8 +24,8 @@
     "node": ">=8.10.0"
   },
   "dependencies": {
-    "underscore": "~1.12.1",
-    "async": "~0.2.7"
+    "underscore": "~1.13.3",
+    "async": "~3.2.3"
   },
   "licenses": [
     {
