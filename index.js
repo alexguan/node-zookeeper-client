@@ -115,8 +115,8 @@ function attempt(self, fn, callback) {
     assert(typeof callback === 'function', 'callback must be a function.');
 
     async.whilst(
-        function () {
-            return count <= retries && retry;
+        function (next) {
+            return next(null, count <= retries && retry);
         },
         function (next) {
             var attempts = count;
