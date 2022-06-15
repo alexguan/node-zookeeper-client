@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.1.3
+
+Fix dependencies upgrade
+
 ## 1.1.2
 
 Upgrade the dependencies to fix security related issues
