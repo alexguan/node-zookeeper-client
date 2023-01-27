@@ -859,37 +859,28 @@ Client.prototype.getChildren = function (path, watcher, callback) {
  * ensemble.
  *
  * @method listSubTreeBFS
- * @param path {String} The node path.
- * @param callback {Function} The callback function.
+ * @param {string} parentPath The node path.
+ * @param {Function} callback The callback function.
  */
-Client.prototype.listSubTreeBFS = function(path, callback) {
-    Path.validate(path);
+ Client.prototype.listSubTreeBFS = function (parentPath, callback) {
+    Path.validate(parentPath);
     assert(typeof callback === 'function', 'callback must be a function.');
 
-    var self = this;
-    var tree = [path];
-
-    async.reduce(tree, tree, function(memo, item, next) {
-        self.getChildren(item, function (error, children) {
-            if (error) {
-                next(error);
-                return;
-            }
-            if (!children || !Array.isArray(children) || !children.length) {
-                next(null, tree);
-                return;
-            }
-            children.forEach(function(child) {
-                var childPath = item + '/' + child;
-
-                if (item === '/') {
-                    childPath = item + child;
+    const self = this;
+    self.getChildren(parentPath, (err, children) => {
+        if (err) {
+            return callback(err);
+        }
+        async.reduce(children, [parentPath], (accumulator, child, reduceCallback) => {
+            const thisChildPath = parentPath + "/" + child
+            self.listSubTreeBFS(thisChildPath, (err, childPaths) => {
+                if (err) {
+                    return reduceCallback(err);
                 }
-                tree.push(childPath);
-            });
-            next(null, tree);
-        });
-    }, callback);
+                return reduceCallback(null, [...accumulator, ...childPaths])
+            })
+        }, callback);
+    });
 };
 
 /**
