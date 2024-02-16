@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.1.4
+
+1. [Add authentication request priority in the packet queue](https://github.com/alexguan/node-zookeeper-client/pull/52)
+
 ## 1.1.3
 
 Fix dependencies upgrade
