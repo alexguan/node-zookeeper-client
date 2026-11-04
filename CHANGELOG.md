@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.2.0
+
+1. Upgrade dependencies and devDependencies to resolve security vulnerabilities
+2. Migrate ESLint configuration to flat config (`eslint.config.js`)
+3. Bump Node requirement to >=20.19.0
+
 ## 1.1.3
 
 Fix dependencies upgrade
