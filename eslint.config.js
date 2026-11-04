@@ -125,6 +125,7 @@ module.exports = [
             'no-undef': 'error',
             'no-undefined': 'off',
             'no-unused-vars': 'off',
+            'no-useless-assignment': 'off',
             'no-use-before-define': 'error',
 
             // Node.js and CommonJS
