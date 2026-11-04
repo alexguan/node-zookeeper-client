@@ -71,10 +71,10 @@ describe('ConnectionStringParser', function () {
                 servers = parser.getServers();
 
             expect(servers).to.be.instanceof(Array).that.have.length(2);
-            expect(servers).to.have.deep.property('[0].host', 'localhost');
-            expect(servers).to.have.deep.property('[0].port').match(/218[12]/);
-            expect(servers).to.have.deep.property('[1].host', 'localhost');
-            expect(servers).to.have.deep.property('[1].port').match(/218[12]/);
+            expect(servers).to.have.nested.property('[0].host', 'localhost');
+            expect(servers).to.have.nested.property('[0].port').match(/218[12]/);
+            expect(servers).to.have.nested.property('[1].host', 'localhost');
+            expect(servers).to.have.nested.property('[1].port').match(/218[12]/);
 
         });
 
@@ -84,8 +84,8 @@ describe('ConnectionStringParser', function () {
                 servers = parser.getServers();
 
             expect(servers).to.be.instanceof(Array).that.have.length(1);
-            expect(servers).to.have.deep.property('[0].host', 'localhost');
-            expect(servers).to.have.deep.property('[0].port', 2181);
+            expect(servers).to.have.nested.property('[0].host', 'localhost');
+            expect(servers).to.have.nested.property('[0].port', 2181);
         });
     });
 });
