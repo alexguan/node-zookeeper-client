@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.2.1
+
+1. [Issue #127: Fix listSubTreeBFS to traverse all subchildren](https://github.com/alexguan/node-zookeeper-client/issues/127)
+
 ## 1.2.0
 
 1. Upgrade dependencies and devDependencies to resolve security vulnerabilities
