@@ -862,34 +862,53 @@ Client.prototype.getChildren = function (path, watcher, callback) {
  * @param path {String} The node path.
  * @param callback {Function} The callback function.
  */
-Client.prototype.listSubTreeBFS = function(path, callback) {
+Client.prototype.listSubTreeBFS = function (path, callback) {
     Path.validate(path);
     assert(typeof callback === 'function', 'callback must be a function.');
 
-    var self = this;
-    var tree = [path];
+    var self = this,
+        tree = [path],
+        queue = [path];
 
-    async.reduce(tree, tree, function(memo, item, next) {
-        self.getChildren(item, function (error, children) {
-            if (error) {
-                next(error);
-                return;
-            }
-            if (!children || !Array.isArray(children) || !children.length) {
-                next(null, tree);
-                return;
-            }
-            children.forEach(function(child) {
-                var childPath = item + '/' + child;
+    async.whilst(
+        function (next) {
+            return next(null, queue.length > 0);
+        },
+        function (next) {
+            var item = queue.shift();
 
-                if (item === '/') {
-                    childPath = item + child;
+            self.getChildren(item, function (error, children) {
+                if (error) {
+                    next(error);
+                    return;
                 }
-                tree.push(childPath);
+
+                if (children && Array.isArray(children) &&
+                        children.length > 0) {
+                    children.forEach(function (child) {
+                        var childPath = item + '/' + child;
+
+                        if (item === '/') {
+                            childPath = item + child;
+                        }
+
+                        tree.push(childPath);
+                        queue.push(childPath);
+                    });
+                }
+
+                next();
             });
-            next(null, tree);
-        });
-    }, callback);
+        },
+        function (error) {
+            if (error) {
+                callback(error);
+                return;
+            }
+
+            callback(null, tree);
+        }
+    );
 };
 
 /**
